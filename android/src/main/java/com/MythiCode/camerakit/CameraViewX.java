@@ -258,7 +258,7 @@ public class CameraViewX implements CameraViewInterface {
                     preview = new Preview.Builder()
                             .setTargetResolution(new Size(optimalPreviewSize.getWidth(), optimalPreviewSize.getHeight()))
                             .build();
-                    preview.setSurfaceProvider(previewView.createSurfaceProvider());
+                    preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
 
                     imageCapture = new ImageCapture.Builder()
