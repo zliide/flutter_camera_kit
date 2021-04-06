@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import 'CameraKitController.dart';
+import 'camerakit_controller.dart';
 
 enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
