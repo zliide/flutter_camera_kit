@@ -11,7 +11,6 @@ import io.flutter.plugin.platform.PlatformView;
 
 public class CameraBaseView implements PlatformView {
 
-
     private final Activity activity;
     private final FlutterMethodListener flutterMethodListener;
     private final FrameLayout linearLayout;

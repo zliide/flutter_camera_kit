@@ -41,7 +41,6 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,8 +59,8 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
 
     private BarcodeScannerOptions options;
     private int mState = STATE_PREVIEW;
-    private Activity activity;
-    private Semaphore cameraOpenCloseLock = new Semaphore(1);
+    private final Activity activity;
+    private final Semaphore cameraOpenCloseLock = new Semaphore(1);
     private String cameraId;
     private CameraDevice cameraDevice;
     private AutoFitTextureView textureView;
@@ -74,7 +73,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
     private Handler backgroundHandler2;
     private FrameLayout frameLayout;
     private CameraCharacteristics characteristics;
-    private StreamConfigurationMap map;
     private Integer sensorOrientation;
     private Size previewSize;
 
@@ -118,7 +116,7 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
      */
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
-    private static SparseIntArray ORIENTATIONS = new SparseIntArray();
+    private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 0);
@@ -128,7 +126,7 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
     }
 
 
-    private CameraCaptureSession.CaptureCallback captureCallbackBarcodeReader
+    private final CameraCaptureSession.CaptureCallback captureCallbackBarcodeReader
             = new CameraCaptureSession.CaptureCallback() {
 
         @Override
@@ -142,10 +140,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
                         setFlashMode(captureRequestBuilder, 'O');
                         setRepeatingRequestAfterSetFlash();
                     }
-//                    } else if (currentPreviewFlashMode == 'O' && aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-//                        setFlashMode(captureRequestBuilder, 'F');
-//                        setRepeatingRequestAfterSetFlash();
-//                    }
                 }
             }
 
@@ -154,7 +148,7 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
     };
 
 
-    private CameraCaptureSession.CaptureCallback captureCallbackTakePicture
+    private final CameraCaptureSession.CaptureCallback captureCallbackTakePicture
             = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult result) {
@@ -231,7 +225,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-            // Transform you image captured size according to the surface width and height
 
         }
 
@@ -277,7 +270,7 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
             cameraDevice = null;
         }
     };
-    private FlutterMethodListener flutterMethodListener;
+    private final FlutterMethodListener flutterMethodListener;
     private boolean hasBarcodeReader;
     private char previewFlashMode;
     private char currentPreviewFlashMode;
@@ -296,7 +289,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
 
 
     public CameraView2(Activity activity, FlutterMethodListener flutterMethodListener) {
-//        FirebaseApp.initializeApp(activity);
         this.activity = activity;
         this.flutterMethodListener = flutterMethodListener;
     }
@@ -319,10 +311,11 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         }
         displaySize = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
-        if (isFillScale == true) //fill
+        if (isFillScale) {
             this.frameLayout.setLayoutParams(new FrameLayout.LayoutParams(
                     displaySize.x,
                     displaySize.y));
+        }
 
         textureView = new AutoFitTextureView(activity);
         textureView.setLayoutParams(new LinearLayout.LayoutParams(
@@ -332,15 +325,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         this.frameLayout.addView(textureView);
     }
 
-
-    private int getOrientation() {
-        // Sensor orientation is 90 for most devices, or 270 for some devices (eg. Nexus 5X)
-        // We have to take that into account and rotate JPEG properly.
-        // For devices with orientation of 90, we simply return our mapping from ORIENTATIONS.
-        // For devices with orientation of 270, we need to rotate the JPEG 180 degrees.
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-        return (ORIENTATIONS.get(rotation) + sensorOrientation + 270) % 360;
-    }
 
     private void setUpCameraOutputs(int width, int height) {
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
@@ -364,16 +348,10 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
                 if (map == null) {
                     continue;
                 }
-                // For still image captures, we use the largest available size.
-                Size largest = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                        new CompareSizesByArea());
-
 
                 // Find out if we need to swap dimension to get the preview size relative to sensor
                 // coordinate.
                 int displayRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-                //noinspection ConstantConditions
                 sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
                 boolean swappedDimensions = false;
                 switch (displayRotation) {
@@ -419,7 +397,7 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
                 // garbage capture data.
                 previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
                         rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-                        maxPreviewHeight, largest);
+                        maxPreviewHeight);
 
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 int orientation = activity.getResources().getConfiguration().orientation;
@@ -436,13 +414,10 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
 
                 return;
             }
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            // Currently an NPE is thrown when the Camera2API is used but not supported on the
-            // device this code runs.
+        } catch (CameraAccessException | NullPointerException e) {
             e.printStackTrace();
         }
+
     }
 
     private void configureTransform(int viewWidth, int viewHeight) {
@@ -479,13 +454,11 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         Log.e(TAG, "is camera open");
         try {
 
-            map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
             // Add permission for camera and let user grant the permission
             try {
-                if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-                    //throw new RuntimeException("Time out waiting to lock camera opening.");
-                }
+                cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS);
                 manager.openCamera(cameraId, stateCallback, null);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -506,13 +479,9 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                switch (msg.what) {
-                    case MSG_CAPTURE_PICTURE_WHEN_FOCUS_TIMEOUT:
-                        mState = STATE_PICTURE_TAKEN;
-                        captureStillPicture();
-                        break;
-                    default:
-                        break;
+                if (msg.what == MSG_CAPTURE_PICTURE_WHEN_FOCUS_TIMEOUT) {
+                    mState = STATE_PICTURE_TAKEN;
+                    captureStillPicture();
                 }
 
             }
@@ -546,7 +515,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
-//        textureView.setVisibility(View.VISIBLE);
         if (isCameraVisible) {
             if (textureView != null) {
                 if (textureView.isAvailable()) {
@@ -608,14 +576,12 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
     }
 
     private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+                                          int textureViewHeight, int maxWidth, int maxHeight) {
 
         // Collect the supported resolutions that are at least as big as the preview Surface
         List<Size> bigEnough = new ArrayList<>();
         // Collect the supported resolutions that are smaller than the preview Surface
         List<Size> notBigEnough = new ArrayList<>();
-//        int w = aspectRatio.getWidth();
-//        int h = aspectRatio.getHeight();
 
         int w = 16;
         int h = 9;
@@ -736,14 +702,8 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
             assert texture != null;
             texture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
             surface = new Surface(texture);
-            if (hasBarcodeReader) {
-
-                captureRequestBuilder = cameraDevice
-                        .createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-
-            } else {
-                captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            }
+            captureRequestBuilder = cameraDevice
+                    .createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
             captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -785,36 +745,9 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         else return Arrays.asList(surface, readerCapture.getSurface());
     }
 
-//    private int getFirebaseOrientation() {
-//        int rotationCompensation = getOrientation();
-//
-//        // Return the corresponding FirebaseVisionImageMetadata rotation value.
-//        int result;
-//        switch (rotationCompensation) {
-//            case 0:
-//                result = FirebaseVisionImageMetadata.ROTATION_0;
-//                break;
-//            case 90:
-//                result = FirebaseVisionImageMetadata.ROTATION_90;
-//                break;
-//            case 180:
-//                result = FirebaseVisionImageMetadata.ROTATION_180;
-//                break;
-//            case 270:
-//                result = FirebaseVisionImageMetadata.ROTATION_270;
-//                break;
-//            default:
-//                result = FirebaseVisionImageMetadata.ROTATION_0;
-//                Log.e(TAG, "Bad rotation value: " + rotationCompensation);
-//        }
-//        return result;
-//    }
 
     private void initialImageReader() {
         if (hasBarcodeReader) {
-//            Size m = Collections.max(
-//                    Arrays.asList(map.getOutputSizes(ImageFormat.YUV_420_888)),
-//                    new CompareSizesByArea());
             firebaseOrientation = getJpegOrientation();
             imageReader = ImageReader.newInstance(previewSize.getWidth(), previewSize.getHeight(),
                     ImageFormat.YUV_420_888, 2);
@@ -822,10 +755,8 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
                     this, backgroundHandler2);
             captureRequestBuilder.addTarget(imageReader.getSurface());
             BarcodeDetector.setImageReader(imageReader);
-
         }
     }
-
 
     public void dispose() {
         closeCamera();
@@ -836,26 +767,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         textureView = null;
     }
 
-    private static byte[] convertImageToByte(Image image) {
-        byte[] nv21;
-        ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
-        ByteBuffer uBuffer = image.getPlanes()[1].getBuffer();
-        ByteBuffer vBuffer = image.getPlanes()[2].getBuffer();
-
-        int ySize = yBuffer.remaining();
-        int uSize = uBuffer.remaining();
-        int vSize = vBuffer.remaining();
-
-        nv21 = new byte[ySize + uSize + vSize];
-
-        //U and V are swapped
-        yBuffer.get(nv21, 0, ySize);
-        vBuffer.get(nv21, ySize, vSize);
-        uBuffer.get(nv21, ySize + vSize, uSize);
-
-        return nv21;
-    }
-
     @Override
     public void onImageAvailable(ImageReader reader) {
         final Image image = reader.acquireLatestImage();
@@ -863,13 +774,11 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         if (image != null) {
             try {
                 BarcodeDetector.detectImage(imageReader, scanner, image, flutterMethodListener, firebaseOrientation);
-            } catch (IllegalStateException e) {
+            } catch (IllegalStateException ignored) {
 
             } catch (OutOfMemoryError e) {
                 System.gc();
                 //Sometimes out of memory error occurred, ignore it
-            } finally {
-
             }
 
         }
@@ -890,9 +799,8 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
 
         // Calculate desired JPEG orientation relative to camera orientation to make
         // the image upright relative to the device orientation
-        int jpegOrientation = (sensorOrientation + deviceOrientation + 360) % 360;
 
-        return jpegOrientation;
+        return (sensorOrientation + deviceOrientation + 360) % 360;
     }
 
 
@@ -962,8 +870,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
-//            showToast("onCaptureCompleted: ");
-//                    Log.d(TAG, mFile.toString());
             unlockFocus();
         }
 
@@ -997,28 +903,12 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
             readerCapture.setOnImageAvailableListener(takePictureImageListener, backgroundHandler);
             captureBuilder.addTarget(readerCapture.getSurface());
 
-            // Use the same AE and AF modes as the preview.
-//            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-//                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-//            if(captureFlashMode == 'A'){
-//                if(aeState != null) {
-//                    if(aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED)
-//                        captureFlashMode = 'O';
-//                }
-//            }
             setFlashMode(captureBuilder, previewFlashMode);
-//            if(aeState == null)
-//                setFlashMode(captureBuilder, captureFlashMode);
-//            else if(aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED){
-//                setFlashMode(captureBuilder, 'O');
-//            }
-
 
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation());
 
 
             cameraCaptureSessions.stopRepeating();
-//            cameraCaptureSessions.abortCaptures();
             cameraCaptureSessions.capture(captureBuilder.build(), CaptureCallback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -1029,15 +919,6 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         if (backgroundHandler != null) {
             backgroundHandler.removeMessages(MSG_CAPTURE_PICTURE_WHEN_FOCUS_TIMEOUT);
         }
-    }
-
-    private void showToast(final String s) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(activity, s, Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     private void unlockFocus() {

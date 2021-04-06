@@ -78,7 +78,6 @@ public class CameraViewX implements CameraViewInterface {
 
 
     public CameraViewX(Activity activity, FlutterMethodListener flutterMethodListener) {
-
         this.activity = activity;
         this.flutterMethodListener = flutterMethodListener;
     }
@@ -98,16 +97,11 @@ public class CameraViewX implements CameraViewInterface {
         }
         displaySize = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
-        if (isFillScale == true) //fill
+        if (isFillScale) {
             linearLayout.setLayoutParams(new FrameLayout.LayoutParams(
                     displaySize.x,
                     displaySize.y));
-
-//        textureView = new AutoFitTextureView(activity);
-//        textureView.setLayoutParams(new FrameLayout.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT));
-
+        }
 
         previewView = new PreviewView(activity);
         previewView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -123,8 +117,6 @@ public class CameraViewX implements CameraViewInterface {
                 return ImageCapture.FLASH_MODE_ON;
             case 'F':
                 return ImageCapture.FLASH_MODE_OFF;
-            case 'A':
-                return ImageCapture.FLASH_MODE_AUTO;
             default:
                 return ImageCapture.FLASH_MODE_AUTO;
         }
@@ -138,8 +130,6 @@ public class CameraViewX implements CameraViewInterface {
         List<Size> bigEnough = new ArrayList<>();
         // Collect the supported resolutions that are smaller than the preview Surface
         List<Size> notBigEnough = new ArrayList<>();
-//        int w = aspectRatio.getWidth();
-//        int h = aspectRatio.getHeight();
 
         int w = 16;
         int h = 9;
@@ -178,7 +168,6 @@ public class CameraViewX implements CameraViewInterface {
 
                 // We don't use a front facing camera in this sample.
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                Boolean available = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
                     if (userCameraSelector == 0)
                         continue;
@@ -196,7 +185,6 @@ public class CameraViewX implements CameraViewInterface {
                 // Find out if we need to swap dimension to get the preview size relative to sensor
                 // coordinate.
                 int displayRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-                //noinspection ConstantConditions
                 Integer sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
                 boolean swappedDimensions = false;
                 switch (displayRotation) {
@@ -252,13 +240,10 @@ public class CameraViewX implements CameraViewInterface {
 
                 return;
             }
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            // Currently an NPE is thrown when the Camera2API is used but not supported on the
-            // device this code runs.
+        } catch (CameraAccessException | NullPointerException e) {
             e.printStackTrace();
         }
+
     }
 
     private void startCamera() {
@@ -301,9 +286,7 @@ public class CameraViewX implements CameraViewInterface {
                     bindCamera();
 
 
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -313,9 +296,7 @@ public class CameraViewX implements CameraViewInterface {
 
     void setFlashBarcodeReader() {
         if (camera != null) {
-            if (previewFlashMode == 'O')
-                camera.getCameraControl().enableTorch(true);
-            else camera.getCameraControl().enableTorch(false);
+            camera.getCameraControl().enableTorch(previewFlashMode == 'O');
         }
     }
 

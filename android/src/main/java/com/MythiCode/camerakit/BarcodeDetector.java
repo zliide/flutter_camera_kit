@@ -2,10 +2,8 @@ package com.MythiCode.camerakit;
 
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;

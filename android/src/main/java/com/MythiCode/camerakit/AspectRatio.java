@@ -11,7 +11,7 @@ import androidx.collection.SparseArrayCompat;
 public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
 
     private final static SparseArrayCompat<SparseArrayCompat<AspectRatio>> sCache
-        = new SparseArrayCompat<>(16);
+            = new SparseArrayCompat<>(16);
 
     private final int mX;
     private final int mY;
@@ -29,41 +29,20 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
         x /= gcd;
         y /= gcd;
         SparseArrayCompat<AspectRatio> arrayX = sCache.get(x);
+        AspectRatio ratio;
         if (arrayX == null) {
-            AspectRatio ratio = new AspectRatio(x, y);
+            ratio = new AspectRatio(x, y);
             arrayX = new SparseArrayCompat<>();
             arrayX.put(y, ratio);
             sCache.put(x, arrayX);
-            return ratio;
         } else {
-            AspectRatio ratio = arrayX.get(y);
+            ratio = arrayX.get(y);
             if (ratio == null) {
                 ratio = new AspectRatio(x, y);
                 arrayX.put(y, ratio);
             }
-            return ratio;
         }
-    }
-
-    /**
-     * Parse an {@link AspectRatio} from a {@link String} formatted like "4:3".
-     *
-     * @param s The string representation of the aspect ratio
-     * @return The aspect ratio
-     * @throws IllegalArgumentException when the format is incorrect.
-     */
-    public static AspectRatio parse(String s) {
-        int position = s.indexOf(':');
-        if (position == -1) {
-            throw new IllegalArgumentException("Malformed aspect ratio: " + s);
-        }
-        try {
-            int x = Integer.parseInt(s.substring(0, position));
-            int y = Integer.parseInt(s.substring(position + 1));
-            return AspectRatio.of(x, y);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Malformed aspect ratio: " + s, e);
-        }
+        return ratio;
     }
 
     private AspectRatio(int x, int y) {
@@ -71,21 +50,6 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
         mY = y;
     }
 
-    public int getX() {
-        return mX;
-    }
-
-    public int getY() {
-        return mY;
-    }
-
-
-    public boolean matches(Size size) {
-        int gcd = gcd(size.getWidth(), size.getHeight());
-        int x = size.getWidth() / gcd;
-        int y = size.getHeight() / gcd;
-        return mX == x && mY == y;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -127,14 +91,6 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
         return -1;
     }
 
-    /**
-     * @return The inverse of this {@link AspectRatio}.
-     */
-    public AspectRatio inverse() {
-        //noinspection SuspiciousNameCombination
-        return AspectRatio.of(mY, mX);
-    }
-
     private static int gcd(int a, int b) {
         while (b != 0) {
             int c = b;
@@ -156,7 +112,7 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
     }
 
     public static final Creator<AspectRatio> CREATOR
-        = new Creator<AspectRatio>() {
+            = new Creator<AspectRatio>() {
 
         @Override
         public AspectRatio createFromParcel(Parcel source) {

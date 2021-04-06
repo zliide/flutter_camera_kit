@@ -12,6 +12,7 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class CameraKitFactory extends PlatformViewFactory {
+
     @NonNull
     private final BinaryMessenger messenger;
     @NonNull

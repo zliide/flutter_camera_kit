@@ -12,6 +12,7 @@ import io.flutter.plugin.platform.PlatformViewRegistry;
  * CamerakitPlugin
  */
 public class CamerakitPlugin implements FlutterPlugin, ActivityAware {
+
     private PlatformViewRegistry registry;
     private BinaryMessenger messenger;
 

@@ -16,7 +16,6 @@ import io.flutter.plugin.platform.PlatformView;
 
 public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodCallHandler, FlutterMethodListener {
 
-
     private static final int REQUEST_CAMERA_PERMISSION = 10001;
     private final MethodChannel channel;
     private final ActivityPluginBinding activityPluginBinding;
