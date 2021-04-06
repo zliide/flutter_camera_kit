@@ -23,8 +23,8 @@ class CameraKitController {
 
   ///Use this method for taking picture in take picture mode
   ///This method return path of image
-  Future<String> takePicture() {
-    return cameraKitView.viewState.controller.takePicture();
+  Future<String> takePicture({String path = ""}) {
+    return cameraKitView.viewState.controller.takePicture(path);
   }
 
   ///Change flash mode between auto, on and off

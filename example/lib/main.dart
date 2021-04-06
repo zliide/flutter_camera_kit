@@ -71,10 +71,10 @@ class _MyAppState extends State<MyApp> {
                 onBarcodeRead: (barcode) {
                   print("Flutter read barcode: " + barcode);
                 },
-                previewFlashMode: CameraFlashMode.on,
+                previewFlashMode: CameraFlashMode.auto,
                 cameraKitController: cameraKitController,
                 androidCameraMode: AndroidCameraMode.API_X,
-                cameraSelector: CameraSelector.front,
+                cameraSelector: CameraSelector.back,
               )),
 //              Container(height: 250),
               Row(

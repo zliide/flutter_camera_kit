@@ -285,8 +285,8 @@ class NativeCameraKitController {
   }
 
   ///Call take picture in Native API
-  Future<String> takePicture() async {
-    return _channel.invokeMethod('takePicture', null);
+  Future<String> takePicture(String path) async {
+    return _channel.invokeMethod('takePicture', {"path": path});
   }
 
   ///Call change flash mode in Native API
