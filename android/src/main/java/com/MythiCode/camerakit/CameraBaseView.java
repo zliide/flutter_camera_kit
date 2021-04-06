@@ -29,9 +29,6 @@ public class CameraBaseView implements PlatformView {
     }
 
     public void initCamera(boolean hasBarcodeReader, char flashMode, boolean isFillScale, int barcodeMode, int androidCameraMode, int cameraSelector) {
-        if (hasBarcodeReader && androidCameraMode == 1) {
-            throw new RuntimeException("You cannot use barcode reader for reading barcode in Camera API1");
-        }
         switch (androidCameraMode) {
             case 3:
                 cameraViewInterface = new CameraViewX(activity, flutterMethodListener);
@@ -40,10 +37,8 @@ public class CameraBaseView implements PlatformView {
                 cameraViewInterface = new CameraView2(activity, flutterMethodListener);
                 break;
             case 1:
-                cameraViewInterface = new CameraView1(activity, flutterMethodListener);
-                break;
+                return;
         }
-
 
         cameraViewInterface.initCamera(linearLayout, hasBarcodeReader, flashMode, isFillScale, barcodeMode, cameraSelector);
     }

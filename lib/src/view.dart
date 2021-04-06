@@ -10,7 +10,7 @@ import 'controller.dart';
 
 enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
-enum AndroidCameraMode { API_1, API_2, API_X }
+enum AndroidCameraMode { API_2, API_X }
 enum CameraSelector { front, back }
 enum BarcodeFormats {
   FORMAT_ALL_FORMATS,
@@ -222,8 +222,6 @@ class NativeCameraKitController {
 
   _getAndroidCameraMode(AndroidCameraMode androidCameraMode) {
     switch (androidCameraMode) {
-      case AndroidCameraMode.API_1:
-        return 1;
       case AndroidCameraMode.API_2:
         return 2;
       case AndroidCameraMode.API_X:
