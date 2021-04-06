@@ -11,6 +11,5 @@
 @implementation CamerakitPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   [SwiftCamerakitPlugin registerWithRegistrar:registrar];
-    
 }
 @end

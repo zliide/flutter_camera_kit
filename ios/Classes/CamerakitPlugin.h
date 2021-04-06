@@ -2,6 +2,3 @@
 
 @interface CamerakitPlugin : NSObject<FlutterPlugin>
 @end
-
-
-

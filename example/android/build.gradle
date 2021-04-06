@@ -1,19 +1,16 @@
 buildscript {
     repositories {
-//        maven { url 'https://dl.bintray.com/android/android-tools' }
         google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.0'
     }
 }
 
 allprojects {
     repositories {
-
-//        maven { url 'https://dl.bintray.com/android/android-tools' }
         google()
         jcenter()
     }
