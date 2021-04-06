@@ -26,7 +26,6 @@ public class BarcodeDetector {
         BarcodeDetector.imageReader = imageReader;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static void detectImage(final ImageReader imageReader, BarcodeScanner scanner
             , final Image inputImage, final FlutterMethodListener flutterMethodListener, int firebaseOrientation) {
 

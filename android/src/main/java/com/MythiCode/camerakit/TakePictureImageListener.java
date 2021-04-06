@@ -1,11 +1,7 @@
 package com.MythiCode.camerakit;
 
-import android.app.Activity;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +12,6 @@ import java.nio.ByteBuffer;
 
 import io.flutter.plugin.common.MethodChannel;
 
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class TakePictureImageListener implements ImageReader.OnImageAvailableListener {
 
 

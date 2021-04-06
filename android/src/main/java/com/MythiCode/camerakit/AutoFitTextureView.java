@@ -2,13 +2,6 @@ package com.MythiCode.camerakit;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.TextureView;
-
-/**
- * A {@link TextureView} that can be adjusted to a specified aspect ratio.
- */
-import android.content.Context;
-import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.TextureView;

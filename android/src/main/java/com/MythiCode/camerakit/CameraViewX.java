@@ -11,7 +11,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
-import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -19,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
@@ -54,7 +52,6 @@ import io.flutter.plugin.common.MethodChannel;
 
 import static android.content.ContentValues.TAG;
 
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraViewX implements CameraViewInterface {
 
     private static final int MAX_PREVIEW_WIDTH = 1920;

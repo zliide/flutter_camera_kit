@@ -1,16 +1,13 @@
 package com.MythiCode.camerakit;
 
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.RequiresApi;
 import androidx.collection.SparseArrayCompat;
 
 /**
  * Immutable class for describing proportional relationship between width and height.
  */
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
 
     private final static SparseArrayCompat<SparseArrayCompat<AspectRatio>> sCache

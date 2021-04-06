@@ -21,7 +21,6 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -36,7 +35,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
@@ -56,7 +54,6 @@ import io.flutter.plugin.common.MethodChannel;
 
 import static android.content.ContentValues.TAG;
 
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvailableListener {
 
     private static final int MSG_CAPTURE_PICTURE_WHEN_FOCUS_TIMEOUT = 100;

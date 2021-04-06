@@ -1,11 +1,6 @@
 package com.MythiCode.camerakit;
 
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraConstants {
 
     public static final AspectRatio DEFAULT_ASPECT_RATIO = AspectRatio.of(16, 9);
