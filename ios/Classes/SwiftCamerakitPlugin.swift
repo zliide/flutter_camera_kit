@@ -3,13 +3,7 @@ import UIKit
 
 public class SwiftCamerakitPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "camerakit", binaryMessenger: registrar.messenger())
-    let instance = SwiftCamerakitPlugin()
-    registrar.register(CameraKitFactory(registrar: registrar), withId: "plugins/camera_kit")
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    result("iOS " + UIDevice.current.systemVersion)
+    let factory = CameraKitFactory(registrar: registrar)
+    registrar.register(factory, withId: "plugins/camera_kit")
   }
 }
