@@ -1,2 +1,2 @@
-export 'camerakit_controller.dart';
-export 'camerakit_view.dart';
+export 'src/controller.dart';
+export 'src/view.dart';

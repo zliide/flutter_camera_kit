@@ -1,4 +1,4 @@
-import 'package:camerakit/camerakit_view.dart';
+import 'package:camerakit/src/view.dart';
 
 ///This controller is used to control CameraKiView.dart
 class CameraKitController {
