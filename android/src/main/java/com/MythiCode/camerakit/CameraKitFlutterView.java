@@ -2,21 +2,18 @@ package com.MythiCode.camerakit;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
-import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformView;
 
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodCallHandler, FlutterMethodListener {
 
 
@@ -27,66 +24,75 @@ public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodC
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull final MethodChannel.Result result) {
-        if (call.method.equals("requestPermission")) {
-            if (ActivityCompat.checkSelfPermission(activityPluginBinding.getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activityPluginBinding.getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-                activityPluginBinding.addRequestPermissionsResultListener(new PluginRegistry.RequestPermissionsResultListener() {
-                    @Override
-                    public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-                        for (int i :
-                                grantResults) {
-                            if (i == PackageManager.PERMISSION_DENIED) {
-                                try {
-                                    result.success(false);
-                                }catch (Exception e){
+        switch (call.method) {
+            case "requestPermission":
+                if (ActivityCompat.checkSelfPermission(activityPluginBinding.getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activityPluginBinding.getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+                    activityPluginBinding.addRequestPermissionsResultListener(new PluginRegistry.RequestPermissionsResultListener() {
+                        @Override
+                        public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                            for (int i :
+                                    grantResults) {
+                                if (i == PackageManager.PERMISSION_DENIED) {
+                                    try {
+                                        result.success(false);
+                                    } catch (Exception ignored) {
 
+                                    }
+                                    return false;
                                 }
-                                return false;
                             }
-                        }
-                        try {
-                            result.success(true);
-                        } catch (Exception e) {
+                            try {
+                                result.success(true);
+                            } catch (Exception ignored) {
 
+                            }
+                            return false;
                         }
-                        return false;
+                    });
+                    return;
+                } else {
+                    try {
+                        result.success(true);
+                    } catch (Exception ignored) {
+
                     }
-                });
-                return;
-            } else {
-                try {
-                    result.success(true);
-                } catch (Exception e) {
-
                 }
-            }
-        } else if (call.method.equals("initCamera")) {
-            boolean hasBarcodeReader = call.argument("hasBarcodeReader");
-            char flashMode = call.argument("flashMode").toString().charAt(0);
-            boolean isFillScale = call.argument("isFillScale");
-            int barcodeMode = call.argument("barcodeMode");
-            int androidCameraMode = call.argument("androidCameraMode");
-            int cameraSelector = call.argument("cameraSelector");
-            getCameraView().initCamera(hasBarcodeReader, flashMode, isFillScale, barcodeMode
-                    , androidCameraMode, cameraSelector);
-        } else if (call.method.equals("resumeCamera")) {
-            getCameraView().resumeCamera();
+                break;
+            case "initCamera":
+                boolean hasBarcodeReader = call.argument("hasBarcodeReader");
+                char flashMode = call.argument("flashMode").toString().charAt(0);
+                boolean isFillScale = call.argument("isFillScale");
+                int barcodeMode = call.argument("barcodeMode");
+                int androidCameraMode = call.argument("androidCameraMode");
+                int cameraSelector = call.argument("cameraSelector");
+                getCameraView().initCamera(hasBarcodeReader, flashMode, isFillScale, barcodeMode, androidCameraMode, cameraSelector);
+                break;
+            case "resumeCamera":
+                getCameraView().resumeCamera();
 
-        } else if (call.method.equals("pauseCamera")) {
-            getCameraView().pauseCamera();
-        } else if (call.method.equals("takePicture")) {
-            String path = call.argument("path").toString();
-            getCameraView().takePicture(path, result);
-        } else if (call.method.equals("changeFlashMode")) {
-            char captureFlashMode = call.argument("flashMode").toString().charAt(0);
-            getCameraView().changeFlashMode(captureFlashMode);
-        } else if (call.method.equals("dispose")) {
-            dispose();
-        } else if (call.method.equals("setCameraVisible")) {
-            boolean isCameraVisible = call.argument("isCameraVisible");
-            getCameraView().setCameraVisible(isCameraVisible);
-        } else {
-            result.notImplemented();
+                break;
+            case "pauseCamera":
+                getCameraView().pauseCamera();
+                break;
+            case "takePicture":
+                String path = call.argument("path").toString();
+                getCameraView().takePicture(path, result);
+                break;
+            case "changeFlashMode":
+                char captureFlashMode = call.argument("flashMode").toString().charAt(0);
+                getCameraView().changeFlashMode(captureFlashMode);
+                break;
+            case "dispose":
+                dispose();
+                break;
+            case "setCameraVisible":
+                boolean isCameraVisible = call.argument("isCameraVisible");
+                getCameraView().setCameraVisible(isCameraVisible);
+                break;
+            default:
+                result.notImplemented();
+                break;
         }
     }
 
@@ -94,8 +100,8 @@ public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodC
         return cameraView;
     }
 
-    public CameraKitFlutterView(ActivityPluginBinding activityPluginBinding, DartExecutor dartExecutor, int viewId) {
-        this.channel = new MethodChannel(dartExecutor, "plugins/camera_kit_" + viewId);
+    public CameraKitFlutterView(ActivityPluginBinding activityPluginBinding, @NonNull BinaryMessenger messenger, int id) {
+        this.channel = new MethodChannel(messenger, "plugins/camera_kit_" + id);
         this.activityPluginBinding = activityPluginBinding;
         this.channel.setMethodCallHandler(this);
         if (getCameraView() == null) {
