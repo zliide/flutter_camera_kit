@@ -18,15 +18,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     cameraKitController = CameraKitController();
-    print("cameraKitController" + cameraKitController.toString());
-    cameraKitView = CameraKitView(
-      hasBarcodeReader: true,
-      onBarcodeRead: (barcode) {
-        print("Flutter read barcode: " + barcode);
-      },
-      previewFlashMode: CameraFlashMode.auto,
-      cameraKitController: cameraKitController,
-    );
   }
 
   @override
@@ -39,8 +30,7 @@ class _MyAppState extends State<MyApp> {
             children: <Widget>[
               Expanded(
                   child: CameraKitView(
-                hasBarcodeReader: false,
-                barcodeFormat: BarcodeFormats.FORMAT_ALL_FORMATS,
+                hasBarcodeReader: true,
                 scaleType: ScaleTypeMode.fill,
                 onBarcodeRead: (barcode) {
                   print("Flutter read barcode: " + barcode);

@@ -14,21 +14,20 @@ enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
 enum AndroidCameraMode { API_2, API_X }
 enum CameraSelector { front, back }
-enum BarcodeFormats {
-  FORMAT_ALL_FORMATS,
-  FORMAT_CODE_128,
-  FORMAT_CODE_39,
-  FORMAT_CODE_93,
-  FORMAT_CODABAR,
-  FORMAT_DATA_MATRIX,
-  FORMAT_EAN_13,
-  FORMAT_EAN_8,
-  FORMAT_ITF,
-  FORMAT_QR_CODE,
-  FORMAT_UPC_A,
-  FORMAT_UPC_E,
-  FORMAT_PDF417,
-  FORMAT_AZTEC
+enum BarcodeFormat {
+  aztec,
+  codaBar,
+  code128,
+  code39,
+  code93,
+  dataMatrix,
+  ean13,
+  ean8,
+  itf,
+  pdf417,
+  qrCode,
+  upcA,
+  upcE,
 }
 
 // ignore: must_be_immutable
@@ -53,7 +52,7 @@ class CameraKitView extends StatefulWidget {
   final CameraFlashMode previewFlashMode;
 
   ///Set barcode format from available values, default value is FORMAT_ALL_FORMATS
-  final BarcodeFormats barcodeFormat;
+  final List<BarcodeFormat> restrictFormat;
 
   ///Controller for this widget
   final CameraKitController cameraKitController;
@@ -76,7 +75,7 @@ class CameraKitView extends StatefulWidget {
       this.hasBarcodeReader = false,
       this.scaleType = ScaleTypeMode.fill,
       this.onBarcodeRead,
-      this.barcodeFormat = BarcodeFormats.FORMAT_ALL_FORMATS,
+      this.restrictFormat = const [],
       this.previewFlashMode = CameraFlashMode.auto,
       this.cameraKitController,
       this.onPermissionDenied,
@@ -244,12 +243,15 @@ class NativeCameraKitController {
     _channel.setMethodCallHandler(nativeMethodCallHandler);
     _channel.invokeMethod('requestPermission').then((value) {
       if (value) {
+        final formats = widget.restrictFormat
+            .map((f) => _getBarcodeFormatValue(f))
+            .toList();
         if (Platform.isAndroid) {
           _channel.invokeMethod('initCamera', {
             "hasBarcodeReader": widget.hasBarcodeReader,
             "flashMode": _getCharFlashMode(widget.previewFlashMode),
             "isFillScale": _getScaleTypeMode(widget.scaleType),
-            "barcodeMode": _getBarcodeModeValue(widget.barcodeFormat),
+            "restrictFormat": formats,
             "androidCameraMode":
                 _getAndroidCameraMode(widget.androidCameraMode),
             "cameraSelector": _getCameraSelector(widget.cameraSelector)
@@ -259,7 +261,7 @@ class NativeCameraKitController {
             "hasBarcodeReader": widget.hasBarcodeReader,
             "flashMode": _getCharFlashMode(widget.previewFlashMode),
             "isFillScale": _getScaleTypeMode(widget.scaleType),
-            "barcodeMode": _getBarcodeModeValue(widget.barcodeFormat),
+            "restrictFormat": formats,
             "cameraSelector": _getCameraSelector(widget.cameraSelector)
           });
         }
@@ -307,35 +309,33 @@ class NativeCameraKitController {
         .invokeMethod('setCameraVisible', {"isCameraVisible": isCameraVisible});
   }
 
-  int _getBarcodeModeValue(BarcodeFormats barcodeMode) {
-    switch (barcodeMode) {
-      case BarcodeFormats.FORMAT_ALL_FORMATS:
-        return 0;
-      case BarcodeFormats.FORMAT_CODE_128:
+  int _getBarcodeFormatValue(BarcodeFormat format) {
+    switch (format) {
+      case BarcodeFormat.code128:
         return 1;
-      case BarcodeFormats.FORMAT_CODE_39:
+      case BarcodeFormat.code39:
         return 2;
-      case BarcodeFormats.FORMAT_CODE_93:
+      case BarcodeFormat.code93:
         return 4;
-      case BarcodeFormats.FORMAT_CODABAR:
+      case BarcodeFormat.codaBar:
         return 8;
-      case BarcodeFormats.FORMAT_DATA_MATRIX:
+      case BarcodeFormat.dataMatrix:
         return 16;
-      case BarcodeFormats.FORMAT_EAN_13:
+      case BarcodeFormat.ean13:
         return 32;
-      case BarcodeFormats.FORMAT_EAN_8:
+      case BarcodeFormat.ean8:
         return 64;
-      case BarcodeFormats.FORMAT_ITF:
+      case BarcodeFormat.itf:
         return 128;
-      case BarcodeFormats.FORMAT_QR_CODE:
+      case BarcodeFormat.qrCode:
         return 256;
-      case BarcodeFormats.FORMAT_UPC_A:
+      case BarcodeFormat.upcA:
         return 512;
-      case BarcodeFormats.FORMAT_UPC_E:
+      case BarcodeFormat.upcE:
         return 1024;
-      case BarcodeFormats.FORMAT_PDF417:
+      case BarcodeFormat.pdf417:
         return 2048;
-      case BarcodeFormats.FORMAT_AZTEC:
+      case BarcodeFormat.aztec:
         return 4096;
 
       default:

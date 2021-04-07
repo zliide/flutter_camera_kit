@@ -293,7 +293,8 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         this.flutterMethodListener = flutterMethodListener;
     }
 
-    public void initCamera(FrameLayout frameLayout, boolean hasBarcodeReader, char flashMode, boolean isFillScale, int barcodeMode, int cameraSelector) {
+    public void initCamera(FrameLayout frameLayout, boolean hasBarcodeReader, char flashMode,
+                           boolean isFillScale, ArrayList<Integer> restrictFormat, int cameraSelector) {
         this.cameraSelector = cameraSelector;
         startBackgroundThread();
         this.frameLayout = frameLayout;
@@ -301,12 +302,11 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         this.previewFlashMode = flashMode;
 
         if (hasBarcodeReader) {
-
-            options = new BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(
-                            barcodeMode
-                    )
-                    .build();
+            BarcodeScannerOptions.Builder optionsBuilder = new BarcodeScannerOptions.Builder();
+            for (int f : restrictFormat) {
+                optionsBuilder.setBarcodeFormats(f);
+            }
+            options = optionsBuilder.build();
             scanner = BarcodeScanning.getClient(options);
         }
         displaySize = new Point();

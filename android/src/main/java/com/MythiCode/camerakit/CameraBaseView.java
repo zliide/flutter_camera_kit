@@ -6,6 +6,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
+
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
@@ -27,7 +29,7 @@ public class CameraBaseView implements PlatformView {
 
     }
 
-    public void initCamera(boolean hasBarcodeReader, char flashMode, boolean isFillScale, int barcodeMode, int androidCameraMode, int cameraSelector) {
+    public void initCamera(boolean hasBarcodeReader, char flashMode, boolean isFillScale, ArrayList<Integer> restrictFormat, int androidCameraMode, int cameraSelector) {
         switch (androidCameraMode) {
             case 3:
                 cameraViewInterface = new CameraViewX(activity, flutterMethodListener);
@@ -39,7 +41,7 @@ public class CameraBaseView implements PlatformView {
                 return;
         }
 
-        cameraViewInterface.initCamera(linearLayout, hasBarcodeReader, flashMode, isFillScale, barcodeMode, cameraSelector);
+        cameraViewInterface.initCamera(linearLayout, hasBarcodeReader, flashMode, isFillScale, restrictFormat, cameraSelector);
     }
 
     public void setCameraVisible(boolean isCameraVisible) {
