@@ -89,11 +89,11 @@ public class CameraViewX implements CameraViewInterface {
         this.previewFlashMode = flashMode;
         userCameraSelector = cameraSelector;
         if (hasBarcodeReader) {
-            BarcodeScannerOptions.Builder optionsBuilder = new BarcodeScannerOptions.Builder();
+            int format = 0;
             for (int f : restrictFormat) {
-                optionsBuilder.setBarcodeFormats(f);
+                format |= f;
             }
-            options = optionsBuilder.build();
+            options =  new BarcodeScannerOptions.Builder().setBarcodeFormats(format).build();
             scanner = BarcodeScanning.getClient(options);
         }
         displaySize = new Point();

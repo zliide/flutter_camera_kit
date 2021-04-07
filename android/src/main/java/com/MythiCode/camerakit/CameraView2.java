@@ -302,11 +302,11 @@ public class CameraView2 implements CameraViewInterface, ImageReader.OnImageAvai
         this.previewFlashMode = flashMode;
 
         if (hasBarcodeReader) {
-            BarcodeScannerOptions.Builder optionsBuilder = new BarcodeScannerOptions.Builder();
+            int format = 0;
             for (int f : restrictFormat) {
-                optionsBuilder.setBarcodeFormats(f);
+                format |= f;
             }
-            options = optionsBuilder.build();
+            options =  new BarcodeScannerOptions.Builder().setBarcodeFormats(format).build();
             scanner = BarcodeScanning.getClient(options);
         }
         displaySize = new Point();
