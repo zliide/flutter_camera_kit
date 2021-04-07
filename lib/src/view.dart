@@ -8,6 +8,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import 'controller.dart';
 
+typedef BarcodeReadCallback = void Function(String code);
+
 enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
 enum AndroidCameraMode { API_2, API_X }
@@ -32,10 +34,10 @@ enum BarcodeFormats {
 // ignore: must_be_immutable
 class CameraKitView extends StatefulWidget {
   /// In barcodeReader mode, while camera preview detect barcodes, This method is called.
-  final Function onBarcodeRead;
+  final BarcodeReadCallback onBarcodeRead;
 
   ///After android and iOS user deny run time permission, this method is called.
-  final Function onPermissionDenied;
+  final VoidCallback onPermissionDenied;
 
   ///There are 2 modes `ScaleTypeMode.fill` and `ScaleTypeMode.fit` for this parameter.
   ///If you want camera preview fill your widget area, use `fill` mode. In this mode, camera preview may be croped for filling widget area.
