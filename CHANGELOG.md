@@ -1,3 +1,6 @@
+## 0.0.77
+* Accept multiple barcode formats
+
 ## 0.0.76
 * Remove unused code
 * Rebuild with Flutter 2
