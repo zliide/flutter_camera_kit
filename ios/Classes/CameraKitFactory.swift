@@ -1,7 +1,6 @@
 import Foundation
 import Flutter
 
-@available(iOS 10.0, *)
 class CameraKitFactory: NSObject, FlutterPlatformViewFactory {
 
   let registrar: FlutterPluginRegistrar

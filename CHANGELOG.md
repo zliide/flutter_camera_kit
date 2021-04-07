@@ -1,3 +1,6 @@
+## 0.0.78
+* Correctly require minimum iOS 11
+
 ## 0.0.77
 * Accept multiple barcode formats
 

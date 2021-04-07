@@ -5,7 +5,6 @@ import MLKitCommon
 import MLKitVision
 
 
-@available(iOS 10.0, *)
 class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
   let channel: FlutterMethodChannel
   let frame: CGRect
@@ -161,7 +160,6 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
     setupAVCapture()
   }
 
-  @available(iOS 10.0, *)
   func setupAVCapture() {
     session.sessionPreset = AVCaptureSession.Preset.hd1920x1080
     guard let device = AVCaptureDevice
