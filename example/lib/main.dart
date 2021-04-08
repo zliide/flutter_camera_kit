@@ -32,8 +32,8 @@ class _MyAppState extends State<MyApp> {
                   child: CameraKitView(
                 hasBarcodeReader: true,
                 scaleType: ScaleTypeMode.fill,
-                onBarcodeRead: (barcode) {
-                  print("Flutter read barcode: " + barcode);
+                onBarcodesRead: (barcodes) {
+                  print("Flutter read barcode: $barcodes");
                 },
                 previewFlashMode: CameraFlashMode.auto,
                 cameraKitController: cameraKitController,

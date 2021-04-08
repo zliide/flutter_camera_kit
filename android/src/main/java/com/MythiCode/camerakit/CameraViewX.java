@@ -93,7 +93,7 @@ public class CameraViewX implements CameraViewInterface {
             for (int f : restrictFormat) {
                 format |= f;
             }
-            options =  new BarcodeScannerOptions.Builder().setBarcodeFormats(format).build();
+            options = new BarcodeScannerOptions.Builder().setBarcodeFormats(format).build();
             scanner = BarcodeScanning.getClient(options);
         }
         displaySize = new Point();
@@ -410,10 +410,11 @@ public class CameraViewX implements CameraViewInterface {
                             @Override
                             public void onSuccess(List<Barcode> barcodes) {
                                 if (barcodes.size() > 0) {
-                                    for (Barcode barcode : barcodes
-                                    ) {
-                                        flutterMethodListener.onBarcodeRead(barcode.getRawValue());
+                                    List<String> barcodesList = new ArrayList<>();
+                                    for (Barcode barcode : barcodes) {
+                                        barcodesList.add(barcode.getRawValue());
                                     }
+                                    flutterMethodListener.onBarcodesRead(barcodesList);
                                 }
                             }
                         })

@@ -379,13 +379,13 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
       return
     }
 
-    for barcode in barcodes {
-      barcodeRead(barcode: barcode.rawValue!)
-    }
+    barcodesRead(barcodes: barcodes.map {
+      $0.rawValue!
+    })
   }
 
-  func barcodeRead(barcode: String) {
-    channel.invokeMethod("onBarcodeRead", arguments: barcode)
+  func barcodesRead(barcodes: [String]) {
+    channel.invokeMethod("onBarcodesRead", arguments: barcodes)
   }
 
 }

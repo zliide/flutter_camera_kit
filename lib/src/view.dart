@@ -8,7 +8,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import 'controller.dart';
 
-typedef BarcodeReadCallback = void Function(String code);
+typedef BarcodesReadCallback = void Function(List<String> barcodes);
 
 enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
@@ -33,7 +33,7 @@ enum BarcodeFormat {
 // ignore: must_be_immutable
 class CameraKitView extends StatefulWidget {
   /// In barcodeReader mode, while camera preview detect barcodes, This method is called.
-  final BarcodeReadCallback onBarcodeRead;
+  final BarcodesReadCallback onBarcodesRead;
 
   ///After android and iOS user deny run time permission, this method is called.
   final VoidCallback onPermissionDenied;
@@ -74,7 +74,7 @@ class CameraKitView extends StatefulWidget {
       {Key key,
       this.hasBarcodeReader = false,
       this.scaleType = ScaleTypeMode.fill,
-      this.onBarcodeRead,
+      this.onBarcodesRead,
       this.restrictFormat = const [],
       this.previewFlashMode = CameraFlashMode.auto,
       this.cameraKitController,
@@ -190,9 +190,9 @@ class NativeCameraKitController {
   final MethodChannel _channel;
 
   Future<dynamic> nativeMethodCallHandler(MethodCall methodCall) async {
-    if (methodCall.method == "onBarcodeRead") {
-      if (widget.onBarcodeRead != null)
-        widget.onBarcodeRead(methodCall.arguments);
+    if (methodCall.method == "onBarcodesRead") {
+      if (widget.onBarcodesRead != null)
+        widget.onBarcodesRead(List.from(methodCall.arguments));
     }
 
     return null;

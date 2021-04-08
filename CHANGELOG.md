@@ -1,3 +1,6 @@
+## 0.0.79
+* Return list of barcodes instead of a single one
+
 ## 0.0.78
 * Correctly require minimum iOS 11
 

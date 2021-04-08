@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -123,8 +124,8 @@ public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodC
     }
 
     @Override
-    public void onBarcodeRead(String barcode) {
-        channel.invokeMethod("onBarcodeRead", barcode);
+    public void onBarcodesRead(List<String> barcodes) {
+        channel.invokeMethod("onBarcodesRead", barcodes);
     }
 
     @Override

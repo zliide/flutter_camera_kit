@@ -13,6 +13,7 @@ import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BarcodeDetector {
@@ -36,11 +37,11 @@ public class BarcodeDetector {
                             public void onSuccess(List<com.google.mlkit.vision.barcode.Barcode> barcodes) {
                                 if (imageReader == BarcodeDetector.imageReader) {
                                     if (barcodes.size() > 0) {
-                                        for (com.google.mlkit.vision.barcode.Barcode barcode : barcodes
-                                        ) {
-                                            flutterMethodListener.onBarcodeRead(barcode.getRawValue());
-
+                                        List<String> barcodesList = new ArrayList<>();
+                                        for (Barcode barcode : barcodes) {
+                                            barcodesList.add(barcode.getRawValue());
                                         }
+                                        flutterMethodListener.onBarcodesRead(barcodesList);
                                     }
                                 }
                             }
