@@ -68,6 +68,7 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
               , restrictFormat: (myArgs?["restrictFormat"]) as! [Int]
               , cameraSelector: (myArgs?["cameraSelector"]) as! Int
           )
+          self.startOrientationListener()
         }
       } else if FlutterMethodCall.method == "resumeCamera" {
         if self.initCameraFinished == true {
@@ -102,6 +103,29 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
         self.takePicture()
       }
     })
+  }
+
+  func startOrientationListener() {
+    UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+    NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIDevice.orientationDidChangeNotification, object: nil)
+  }
+
+  @objc func orientationChanged() {
+    let videoOrientation = { () -> AVCaptureVideoOrientation in
+      switch UIApplication.shared.statusBarOrientation {
+      case .landscapeLeft:
+        return .landscapeLeft
+      case .landscapeRight:
+        return .landscapeRight
+      case .portraitUpsideDown:
+        return .portraitUpsideDown
+      default:
+        return .portrait
+      }
+    }
+    DispatchQueue.main.async {
+      self.previewLayer.connection?.videoOrientation = videoOrientation()
+    }
   }
 
   func changeFlashMode() {

@@ -1,3 +1,6 @@
+## 0.0.80
+* Fix video orientation in landscape on iOS
+
 ## 0.0.79
 * Return list of barcodes instead of a single one
 
