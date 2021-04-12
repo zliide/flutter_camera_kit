@@ -33,7 +33,7 @@ class _MyAppState extends State<MyApp> {
                 hasBarcodeReader: true,
                 scaleType: ScaleTypeMode.fill,
                 onBarcodesRead: (barcodes) {
-                  print("Flutter read barcode: $barcodes");
+                  print('Flutter read barcode: $barcodes');
                 },
                 previewFlashMode: CameraFlashMode.auto,
                 cameraKitController: cameraKitController,
@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
               Row(
                 children: <Widget>[
                   ElevatedButton(
-                    child: Text("Flash OFF"),
+                    child: const Text('Flash OFF'),
                     onPressed: () {
                       setState(() {
                         cameraKitController
@@ -52,14 +52,14 @@ class _MyAppState extends State<MyApp> {
                     },
                   ),
                   ElevatedButton(
-                    child: Text("Capture"),
+                    child: const Text('Capture'),
                     onPressed: () {
                       cameraKitController.takePicture().then((value) =>
-                          print("flutter take picture result: " + value));
+                          print('flutter take picture result: ' + value));
                     },
                   ),
                   ElevatedButton(
-                    child: Text("Flash On"),
+                    child: const Text('Flash On'),
                     onPressed: () {
                       setState(() {
                         cameraKitController.changeFlashMode(CameraFlashMode.on);
@@ -70,13 +70,13 @@ class _MyAppState extends State<MyApp> {
               ),
               Builder(
                 builder: (context) => ElevatedButton(
-                  child: Text("GO"),
+                  child: const Text('GO'),
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.push<void>(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Scaffold(
-                                  body: Text("Go is Here"),
+                            builder: (context) => const Scaffold(
+                                  body: Text('Go is Here'),
                                 )));
                   },
                 ),

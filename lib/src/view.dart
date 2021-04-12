@@ -83,7 +83,7 @@ class CameraKitView extends StatefulWidget {
       this.cameraSelector = CameraSelector.back})
       : super(key: key);
 
-  dispose() {
+  void dispose() {
     viewState.disposeView();
   }
 
@@ -106,7 +106,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
     WidgetsBinding.instance!.addObserver(this);
     if (defaultTargetPlatform == TargetPlatform.android) {
       visibilityDetector = VisibilityDetector(
-          key: Key('visible-camerakit-key-1'),
+          key: const Key('visible-camerakit-key-1'),
           onVisibilityChanged: (visibilityInfo) {
             if (controller != null) {
               if (visibilityInfo.visibleFraction == 0)
@@ -121,7 +121,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
           ));
     } else {
       visibilityDetector = VisibilityDetector(
-          key: Key('visible-camerakit-key-1'),
+          key: const Key('visible-camerakit-key-1'),
           onVisibilityChanged: (visibilityInfo) {
             if (visibilityInfo.visibleFraction == 0)
               controller!.setCameraVisible(false);
@@ -136,25 +136,25 @@ class _BarcodeScannerViewState extends State<CameraKitView>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return visibilityDetector;
-  }
+  Widget build(BuildContext context) => visibilityDetector;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        print("Flutter Life Cycle: resumed");
-        if (controller != null) controller!.resumeCamera();
+        print('Flutter Life Cycle: resumed');
+        if (controller != null) {
+          controller!.resumeCamera();
+        }
         break;
       case AppLifecycleState.inactive:
-        print("Flutter Life Cycle: inactive");
+        print('Flutter Life Cycle: inactive');
         if (Platform.isIOS) {
           controller!.pauseCamera();
         }
         break;
       case AppLifecycleState.paused:
-        print("Flutter Life Cycle: paused");
+        print('Flutter Life Cycle: paused');
         controller!.pauseCamera();
         break;
       default:
@@ -169,8 +169,8 @@ class _BarcodeScannerViewState extends State<CameraKitView>
   }
 
   void _onPlatformViewCreated(int id) {
-    this.controller = new NativeCameraKitController._(id, context, widget);
-    this.controller!.initCamera();
+    controller = NativeCameraKitController._(id, context, widget);
+    controller!.initCamera();
   }
 
   void disposeView() {
@@ -185,12 +185,12 @@ class NativeCameraKitController {
   CameraKitView widget;
 
   NativeCameraKitController._(int id, this.context, this.widget)
-      : _channel = new MethodChannel('plugins/camera_kit_' + id.toString());
+      : _channel = MethodChannel('plugins/camera_kit_' + id.toString());
 
   final MethodChannel _channel;
 
   Future<dynamic> nativeMethodCallHandler(MethodCall methodCall) async {
-    if (methodCall.method == "onBarcodesRead") {
+    if (methodCall.method == 'onBarcodesRead') {
       if (widget.onBarcodesRead != null)
         widget.onBarcodesRead!(List.from(methodCall.arguments));
     }
@@ -208,11 +208,11 @@ class NativeCameraKitController {
   String _getCharFlashMode(CameraFlashMode cameraFlashMode) {
     switch (cameraFlashMode) {
       case CameraFlashMode.auto:
-        return "A";
+        return 'A';
       case CameraFlashMode.on:
-        return "O";
+        return 'O';
       case CameraFlashMode.off:
-        return "F";
+        return 'F';
     }
   }
 
@@ -234,30 +234,30 @@ class NativeCameraKitController {
     }
   }
 
-  void initCamera() async {
+  Future<void> initCamera() async {
     _channel.setMethodCallHandler(nativeMethodCallHandler);
-    _channel.invokeMethod('requestPermission').then((value) {
-      if (value) {
+    _channel.invokeMethod<bool>('requestPermission').then((value) {
+      if (value ?? false) {
         final formats = widget.restrictFormat
             .map((f) => _getBarcodeFormatValue(f))
             .toList();
         if (Platform.isAndroid) {
-          _channel.invokeMethod('initCamera', {
-            "hasBarcodeReader": widget.hasBarcodeReader,
-            "flashMode": _getCharFlashMode(widget.previewFlashMode),
-            "isFillScale": _getScaleTypeMode(widget.scaleType),
-            "restrictFormat": formats,
-            "androidCameraMode":
+          _channel.invokeMethod<void>('initCamera', {
+            'hasBarcodeReader': widget.hasBarcodeReader,
+            'flashMode': _getCharFlashMode(widget.previewFlashMode),
+            'isFillScale': _getScaleTypeMode(widget.scaleType),
+            'restrictFormat': formats,
+            'androidCameraMode':
                 _getAndroidCameraMode(widget.androidCameraMode),
-            "cameraSelector": _getCameraSelector(widget.cameraSelector)
+            'cameraSelector': _getCameraSelector(widget.cameraSelector)
           });
         } else {
-          _channel.invokeMethod('initCamera', {
-            "hasBarcodeReader": widget.hasBarcodeReader,
-            "flashMode": _getCharFlashMode(widget.previewFlashMode),
-            "isFillScale": _getScaleTypeMode(widget.scaleType),
-            "restrictFormat": formats,
-            "cameraSelector": _getCameraSelector(widget.cameraSelector)
+          _channel.invokeMethod<void>('initCamera', {
+            'hasBarcodeReader': widget.hasBarcodeReader,
+            'flashMode': _getCharFlashMode(widget.previewFlashMode),
+            'isFillScale': _getScaleTypeMode(widget.scaleType),
+            'restrictFormat': formats,
+            'cameraSelector': _getCameraSelector(widget.cameraSelector)
           });
         }
       } else {
@@ -267,42 +267,30 @@ class NativeCameraKitController {
   }
 
   ///Call resume camera in Native API
-  Future<void> resumeCamera() async {
-    return _channel.invokeMethod('resumeCamera');
-  }
+  Future<void> resumeCamera() => _channel.invokeMethod('resumeCamera');
 
   ///Call pause camera in Native API
-  Future<void> pauseCamera() async {
-    return _channel.invokeMethod('pauseCamera');
-  }
+  Future<void> pauseCamera() => _channel.invokeMethod('pauseCamera');
 
   ///Call close camera in Native API
-  Future<void> closeCamera() {
-    return _channel.invokeMethod('closeCamera');
-  }
+  Future<void> closeCamera() => _channel.invokeMethod('closeCamera');
 
   ///Call take picture in Native API
-  Future<String?> takePicture(String path) async {
-    return _channel.invokeMethod('takePicture', {"path": path});
-  }
+  Future<String?> takePicture(String path) =>
+      _channel.invokeMethod('takePicture', {'path': path});
 
   ///Call change flash mode in Native API
-  Future<void> changeFlashMode(CameraFlashMode captureFlashMode) {
-    return _channel.invokeMethod(
-        'changeFlashMode', {"flashMode": _getCharFlashMode(captureFlashMode)});
-  }
+  Future<void> changeFlashMode(CameraFlashMode captureFlashMode) =>
+      _channel.invokeMethod('changeFlashMode',
+          {'flashMode': _getCharFlashMode(captureFlashMode)});
 
   ///Call dispose in Native API
-  Future<void> dispose() {
-    return _channel.invokeMethod('dispose', "");
-  }
+  Future<void> dispose() => _channel.invokeMethod('dispose', '');
 
   ///Call set camera visible in Native API.
   ///This API is used to automatically manage pause and resume camera
-  Future<void> setCameraVisible(bool isCameraVisible) {
-    return _channel
-        .invokeMethod('setCameraVisible', {"isCameraVisible": isCameraVisible});
-  }
+  Future<void> setCameraVisible(bool isCameraVisible) => _channel
+      .invokeMethod('setCameraVisible', {'isCameraVisible': isCameraVisible});
 
   int _getBarcodeFormatValue(BarcodeFormat format) {
     switch (format) {

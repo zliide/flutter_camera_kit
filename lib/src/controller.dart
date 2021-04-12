@@ -6,29 +6,29 @@ class CameraKitController {
 
   ///pause camera while stop camera preview.
   ///Plugin manage automatically pause camera based android, iOS lifecycle and widget visibility
-  pauseCamera() {
+  void pauseCamera() {
     cameraKitView.viewState.controller!.setCameraVisible(false);
   }
 
   ///Closing camera and dispose all resource
-  closeCamera() {
+  void closeCamera() {
     cameraKitView.viewState.controller!.closeCamera();
   }
 
   ///resume camera while resume camera preview.
   ///Plugin manage automatically resume camera based android, iOS lifecycle and widget visibility
-  resumeCamera() {
+  void resumeCamera() {
     cameraKitView.viewState.controller!.setCameraVisible(true);
   }
 
   ///Use this method for taking picture in take picture mode
   ///This method return path of image
-  Future<String?> takePicture({String path = ""}) {
+  Future<String?> takePicture({String path = ''}) {
     return cameraKitView.viewState.controller!.takePicture(path);
   }
 
   ///Change flash mode between auto, on and off
-  changeFlashMode(CameraFlashMode captureFlashMode) {
+  void changeFlashMode(CameraFlashMode captureFlashMode) {
     cameraKitView.viewState.controller!.changeFlashMode(captureFlashMode);
   }
 
