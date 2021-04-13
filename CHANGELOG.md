@@ -1,5 +1,7 @@
 ## 0.0.80
 * Fix video orientation in landscape on iOS
+* Migrate to null-safety
+* Code clean-up
 
 ## 0.0.79
 * Return list of barcodes instead of a single one
