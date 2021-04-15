@@ -1,3 +1,6 @@
+## 0.0.81
+* Correctly implement dispose method
+
 ## 0.0.80
 * Fix video orientation in landscape on iOS
 * Migrate to null-safety
