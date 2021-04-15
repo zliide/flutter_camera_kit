@@ -241,6 +241,8 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
       } else {
         previewLayer.videoGravity = AVLayerVideoGravity.resizeAspect
       }
+      
+      orientationChanged()
 
       startSession(isFirst: isFirst)
 
