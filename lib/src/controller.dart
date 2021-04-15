@@ -11,8 +11,8 @@ class CameraKitController {
   }
 
   ///Closing camera and dispose all resource
-  void closeCamera() {
-    cameraKitView.viewState.controller!.closeCamera();
+  void dispose() {
+    cameraKitView.viewState.controller!.dispose();
   }
 
   ///resume camera while resume camera preview.

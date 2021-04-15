@@ -272,9 +272,6 @@ class NativeCameraKitController {
   ///Call pause camera in Native API
   Future<void> pauseCamera() => _channel.invokeMethod('pauseCamera');
 
-  ///Call close camera in Native API
-  Future<void> closeCamera() => _channel.invokeMethod('closeCamera');
-
   ///Call take picture in Native API
   Future<String?> takePicture(String path) =>
       _channel.invokeMethod('takePicture', {'path': path});
@@ -285,7 +282,7 @@ class NativeCameraKitController {
           {'flashMode': _getCharFlashMode(captureFlashMode)});
 
   ///Call dispose in Native API
-  Future<void> dispose() => _channel.invokeMethod('dispose', '');
+  Future<void> dispose() => _channel.invokeMethod('dispose');
 
   ///Call set camera visible in Native API.
   ///This API is used to automatically manage pause and resume camera

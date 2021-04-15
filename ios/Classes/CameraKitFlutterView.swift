@@ -101,6 +101,11 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
         self.imageSavePath = ((myArgs?["path"]) as! String)
         self.flutterResultTakePicture = FlutterResult
         self.takePicture()
+      } else if FlutterMethodCall.method == "dispose" {
+        if self.isCameraVisible == true {
+          self.stopCamera()
+          self.isCameraVisible = false
+        }
       }
     })
   }
