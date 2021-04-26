@@ -104,35 +104,21 @@ class _BarcodeScannerViewState extends State<CameraKitView>
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      visibilityDetector = VisibilityDetector(
-          key: const Key('visible-camerakit-key-1'),
-          onVisibilityChanged: (visibilityInfo) {
-            if (controller != null) {
-              if (visibilityInfo.visibleFraction == 0)
-                controller!.setCameraVisible(false);
-              else
-                controller!.setCameraVisible(true);
-            }
-          },
-          child: AndroidView(
-            viewType: 'plugins/camera_kit',
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ));
-    } else {
-      visibilityDetector = VisibilityDetector(
-          key: const Key('visible-camerakit-key-1'),
-          onVisibilityChanged: (visibilityInfo) {
-            if (visibilityInfo.visibleFraction == 0)
-              controller!.setCameraVisible(false);
-            else
-              controller!.setCameraVisible(true);
-          },
-          child: UiKitView(
-            viewType: 'plugins/camera_kit',
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ));
-    }
+    visibilityDetector = VisibilityDetector(
+      key: const Key('visible-camerakit-key-1'),
+      onVisibilityChanged: (visibilityInfo) {
+        controller?.setCameraVisible(visibilityInfo.visibleFraction != 0);
+      },
+      child: defaultTargetPlatform == TargetPlatform.android
+          ? AndroidView(
+              viewType: 'plugins/camera_kit',
+              onPlatformViewCreated: _onPlatformViewCreated,
+            )
+          : UiKitView(
+              viewType: 'plugins/camera_kit',
+              onPlatformViewCreated: _onPlatformViewCreated,
+            ),
+    );
   }
 
   @override

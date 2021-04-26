@@ -1,3 +1,6 @@
+## 0.0.82
+* Prevent call on null
+
 ## 0.0.81
 * Correctly implement dispose method
 
