@@ -25,6 +25,7 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
   var previewLayer: AVCaptureVideoPreviewLayer!
   var captureDevice: AVCaptureDevice!
   let session = AVCaptureSession()
+  var discoverySession: AVCaptureDevice.DiscoverySession!
   var barcodeScanner: BarcodeScanner!
   var flutterResultTakePicture: FlutterResult!
 
@@ -191,10 +192,16 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
 
   func setupAVCapture() {
     session.sessionPreset = AVCaptureSession.Preset.hd1920x1080
-    guard let device = AVCaptureDevice
-        .default(AVCaptureDevice.DeviceType.builtInWideAngleCamera,
-        for: .video,
-        position: cameraPosition) else {
+    if #available(iOS 11.1, *) {
+      discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes:
+                                                            [.builtInTrueDepthCamera, .builtInDualCamera, .builtInWideAngleCamera],
+                                                          mediaType: .video, position: .unspecified)
+    } else {
+      discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes:
+                                                            [.builtInDualCamera, .builtInWideAngleCamera],
+                                                          mediaType: .video, position: .unspecified)
+    }
+    guard let device = bestDevice(in: cameraPosition) else {
       return
     }
     captureDevice = device
@@ -202,6 +209,13 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
 
     beginSession()
     changeFlashMode()
+  }
+  
+  func bestDevice(in position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+      let devices = self.discoverySession.devices
+      guard !devices.isEmpty else { return nil }
+
+      return devices.first(where: { device in device.position == position })!
   }
 
 

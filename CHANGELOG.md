@@ -1,3 +1,6 @@
+## 0.0.84
+* Use the best depth capture device available
+
 ## 0.0.83
 * Prevent call on null
 
