@@ -398,7 +398,7 @@ public class CameraViewX implements CameraViewInterface {
 
         @Override
         public void analyze(@NonNull final ImageProxy imageProxy) {
-            @SuppressLint("UnsafeExperimentalUsageError") Image mediaImage = imageProxy.getImage();
+            @SuppressLint("UnsafeOptInUsageError") Image mediaImage = imageProxy.getImage();
             if (mediaImage != null) {
                 InputImage image =
                         InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
