@@ -1,3 +1,6 @@
+## 0.0.86
+* Remove picture capture functionality
+
 ## 0.0.85
 * SDK update
 * Convert to Kotlin
