@@ -70,10 +70,6 @@ class CameraKitFlutterView(
             }
             "resumeCamera" -> cameraView!!.resumeCamera()
             "pauseCamera" -> cameraView!!.pauseCamera()
-            "takePicture" -> {
-                val path = call.argument<Any>("path").toString()
-                cameraView!!.takePicture(path, result)
-            }
             "changeFlashMode" -> {
                 val captureFlashMode = call.argument<Any>("flashMode").toString()[0]
                 cameraView!!.changeFlashMode(captureFlashMode)
@@ -97,24 +93,6 @@ class CameraKitFlutterView(
 
     override fun onBarcodesRead(barcodes: List<String?>?) {
         channel.invokeMethod("onBarcodesRead", barcodes)
-    }
-
-    override fun onTakePicture(result: MethodChannel.Result?, filePath: String?) {
-        activityPluginBinding.activity.runOnUiThread { result!!.success(filePath) }
-    }
-
-    override fun onTakePictureFailed(
-        result: MethodChannel.Result?,
-        errorCode: String?,
-        errorMessage: String?
-    ) {
-        activityPluginBinding.activity.runOnUiThread {
-            result!!.error(
-                errorCode,
-                errorMessage,
-                null
-            )
-        }
     }
 
     companion object {

@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import java.util.*
 
@@ -39,10 +38,6 @@ class CameraBaseView(
 
     fun changeFlashMode(captureFlashMode: Char) {
         cameraViewInterface!!.changeFlashMode(captureFlashMode)
-    }
-
-    fun takePicture(path: String?, result: MethodChannel.Result?) {
-        cameraViewInterface!!.takePicture(path, result)
     }
 
     fun pauseCamera() {

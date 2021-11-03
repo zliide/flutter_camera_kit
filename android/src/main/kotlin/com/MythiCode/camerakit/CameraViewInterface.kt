@@ -1,7 +1,6 @@
 package com.MythiCode.camerakit
 
 import android.widget.FrameLayout
-import io.flutter.plugin.common.MethodChannel
 import java.util.*
 
 interface CameraViewInterface {
@@ -12,7 +11,6 @@ interface CameraViewInterface {
 
     fun setCameraVisible(isCameraVisible: Boolean)
     fun changeFlashMode(captureFlashMode: Char)
-    fun takePicture(path: String?, result: MethodChannel.Result?)
     fun pauseCamera()
     fun resumeCamera()
     fun dispose()

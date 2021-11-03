@@ -26,8 +26,6 @@ import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import io.flutter.plugin.common.MethodChannel
-import java.io.File
 import java.util.*
 import java.util.concurrent.ExecutionException
 
@@ -35,7 +33,6 @@ class CameraViewX(
     private val activity: Activity,
     private val flutterMethodListener: FlutterMethodListener
 ) : CameraViewInterface {
-    private var imageCapture: ImageCapture? = null
     private var hasBarcodeReader = false
     private var previewFlashMode = 0.toChar()
     private var userCameraSelector = 0
@@ -83,13 +80,6 @@ class CameraViewX(
         frameLayout!!.addView(previewView)
         startCamera()
     }
-
-    private val flashMode: Int
-        get() = when (previewFlashMode) {
-            'O' -> ImageCapture.FLASH_MODE_ON
-            'F' -> ImageCapture.FLASH_MODE_OFF
-            else -> ImageCapture.FLASH_MODE_AUTO
-        }
 
     private fun prepareOptimalSize() {
         val width = previewView!!.width
@@ -186,16 +176,6 @@ class CameraViewX(
                     )
                     .build()
                 preview!!.setSurfaceProvider(previewView!!.surfaceProvider)
-                imageCapture = ImageCapture.Builder()
-                    .setFlashMode(flashMode)
-                    .setTargetResolution(
-                        Size(
-                            optimalPreviewSize!!.width,
-                            optimalPreviewSize!!.height
-                        )
-                    )
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    .build()
                 if (hasBarcodeReader) {
                     imageAnalyzer = ImageAnalysis.Builder()
                         .build()
@@ -222,12 +202,12 @@ class CameraViewX(
         cameraProvider!!.unbindAll()
         if (hasBarcodeReader) {
             camera = cameraProvider!!.bindToLifecycle(
-                (activity as LifecycleOwner), cameraSelector!!, preview, imageCapture, imageAnalyzer
+                (activity as LifecycleOwner), cameraSelector!!, preview, imageAnalyzer
             )
             setFlashBarcodeReader()
         } else {
             cameraProvider!!.bindToLifecycle(
-                (activity as LifecycleOwner), cameraSelector!!, preview, imageCapture
+                (activity as LifecycleOwner), cameraSelector!!, preview
             )
         }
     }
@@ -241,31 +221,9 @@ class CameraViewX(
 
     override fun changeFlashMode(captureFlashMode: Char) {
         previewFlashMode = captureFlashMode
-        imageCapture!!.flashMode = flashMode
         if (hasBarcodeReader) {
             setFlashBarcodeReader()
         }
-    }
-
-    override fun takePicture(path: String?, result: MethodChannel.Result?) {
-        val file = getPictureFile(path)
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-
-
-        // Set up image capture listener, which is triggered after photo has
-        // been taken
-        imageCapture!!.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(activity),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    flutterMethodListener.onTakePicture(result, file.toString() + "")
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    flutterMethodListener.onTakePictureFailed(result, "-1", exception.message)
-                }
-            })
     }
 
     override fun pauseCamera() {}
@@ -299,10 +257,6 @@ class CameraViewX(
             if (scanner == null && hasBarcodeReader) scanner = BarcodeScanning.getClient(options!!)
             startCamera()
         }
-    }
-
-    private fun getPictureFile(path: String?): File {
-        return if (path == "") File(activity.cacheDir, "pic.jpg") else File(path!!)
     }
 
     private inner class BarcodeAnalyzer : ImageAnalysis.Analyzer {

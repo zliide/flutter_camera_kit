@@ -51,13 +51,6 @@ class _MyAppState extends State<MyApp> {
                     },
                   ),
                   ElevatedButton(
-                    child: const Text('Capture'),
-                    onPressed: () {
-                      cameraKitController.takePicture().then((value) =>
-                          print('flutter take picture result: ' + value));
-                    },
-                  ),
-                  ElevatedButton(
                     child: const Text('Flash On'),
                     onPressed: () {
                       setState(() {

@@ -237,10 +237,6 @@ class NativeCameraKitController {
   ///Call pause camera in Native API
   Future<void> pauseCamera() => _channel.invokeMethod('pauseCamera');
 
-  ///Call take picture in Native API
-  Future<String?> takePicture(String path) =>
-      _channel.invokeMethod('takePicture', {'path': path});
-
   ///Call change flash mode in Native API
   Future<void> changeFlashMode(CameraFlashMode captureFlashMode) =>
       _channel.invokeMethod('changeFlashMode',

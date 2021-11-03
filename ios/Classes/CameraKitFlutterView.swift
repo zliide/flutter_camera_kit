@@ -5,7 +5,7 @@ import MLKitCommon
 import MLKitVision
 
 
-class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
+class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOutputSampleBufferDelegate {
   let channel: FlutterMethodChannel
   let frame: CGRect
 
@@ -27,7 +27,6 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
   let session = AVCaptureSession()
   var discoverySession: AVCaptureDevice.DiscoverySession!
   var barcodeScanner: BarcodeScanner!
-  var flutterResultTakePicture: FlutterResult!
 
   init(registrar: FlutterPluginRegistrar, viewId: Int64, frame: CGRect) {
     channel = FlutterMethodChannel(name: "plugins/camera_kit_" + String(viewId), binaryMessenger: registrar.messenger())
@@ -98,10 +97,6 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
           }
         }
 
-      } else if FlutterMethodCall.method == "takePicture" {
-        self.imageSavePath = ((myArgs?["path"]) as! String)
-        self.flutterResultTakePicture = FlutterResult
-        self.takePicture()
       } else if FlutterMethodCall.method == "dispose" {
         if self.isCameraVisible == true {
           self.stopCamera()
@@ -141,7 +136,6 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
         if (captureDevice.hasFlash) {
           try captureDevice.lockForConfiguration()
           captureDevice.torchMode = (flashMode == .auto) ? (.auto) : (self.flashMode == .on ? (.on) : (.off))
-          captureDevice.flashMode = flashMode
           captureDevice.unlockForConfiguration()
         }
       } catch {
@@ -348,56 +342,6 @@ class CameraKitFlutterView: NSObject, FlutterPlatformView, AVCaptureVideoDataOut
       return .up
     @unknown default:
       fatalError()
-    }
-  }
-
-  func saveImage(image: UIImage) -> Bool {
-    guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
-      return false
-    }
-    var fileURL: URL? = nil
-    if imageSavePath == "" {
-      guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
-        return false
-      }
-      fileURL = directory.appendingPathComponent("pic.jpg")!
-    } else {
-      fileURL = URL(fileURLWithPath: imageSavePath)
-    }
-
-
-    guard (try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL) != nil else {
-      return false
-    }
-    do {
-      try data.write(to: fileURL!)
-      flutterResultTakePicture(fileURL?.path)
-      return true
-    } catch {
-      print(error.localizedDescription)
-      flutterResultTakePicture(FlutterError(code: "-103", message: error.localizedDescription, details: nil))
-      return false
-    }
-  }
-
-  func takePicture() {
-    let settings = AVCapturePhotoSettings()
-    if captureDevice.hasFlash {
-      settings.flashMode = flashMode
-    }
-    photoOutput?.capturePhoto(with: settings, delegate: self)
-  }
-
-  public func photoOutput(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?,
-                          resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Swift.Error?) {
-    if let error = error {
-      flutterResultTakePicture(FlutterError(code: "-101", message: error.localizedDescription, details: nil))
-    } else if let buffer = photoSampleBuffer, let data = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: buffer, previewPhotoSampleBuffer: nil),
-              let image = UIImage(data: data) {
-
-      saveImage(image: image)
-    } else {
-      flutterResultTakePicture(FlutterError(code: "-102", message: "Unknown error", details: nil))
     }
   }
 
