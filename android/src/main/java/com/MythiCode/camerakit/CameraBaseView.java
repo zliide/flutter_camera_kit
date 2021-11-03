@@ -29,18 +29,8 @@ public class CameraBaseView implements PlatformView {
 
     }
 
-    public void initCamera(boolean hasBarcodeReader, char flashMode, boolean isFillScale, ArrayList<Integer> restrictFormat, int androidCameraMode, int cameraSelector) {
-        switch (androidCameraMode) {
-            case 3:
-                cameraViewInterface = new CameraViewX(activity, flutterMethodListener);
-                break;
-            case 2:
-                cameraViewInterface = new CameraView2(activity, flutterMethodListener);
-                break;
-            case 1:
-                return;
-        }
-
+    public void initCamera(boolean hasBarcodeReader, char flashMode, boolean isFillScale, ArrayList<Integer> restrictFormat, int cameraSelector) {
+        cameraViewInterface = new CameraViewX(activity, flutterMethodListener);
         cameraViewInterface.initCamera(linearLayout, hasBarcodeReader, flashMode, isFillScale, restrictFormat, cameraSelector);
     }
 

@@ -1,5 +1,7 @@
 package com.MythiCode.camerakit;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -30,10 +32,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
@@ -44,13 +42,11 @@ import com.google.mlkit.vision.common.InputImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 import io.flutter.plugin.common.MethodChannel;
-
-import static android.content.ContentValues.TAG;
 
 public class CameraViewX implements CameraViewInterface {
 
@@ -149,9 +145,9 @@ public class CameraViewX implements CameraViewInterface {
         // Pick the smallest of those big enough. If there is no one big enough, pick the
         // largest of those not big enough.
         if (bigEnough.size() > 0) {
-            return Collections.min(bigEnough, new CameraView2.CompareSizesByArea());
+            return Collections.min(bigEnough, new CompareSizesByArea());
         } else if (notBigEnough.size() > 0) {
-            return Collections.max(notBigEnough, new CameraView2.CompareSizesByArea());
+            return Collections.max(notBigEnough, new CompareSizesByArea());
         } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
             return choices[0];
@@ -249,47 +245,39 @@ public class CameraViewX implements CameraViewInterface {
 
     private void startCamera() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(activity);
-        cameraProviderFuture.addListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    cameraProvider = cameraProviderFuture.get();
+        cameraProviderFuture.addListener(() -> {
+            try {
+                cameraProvider = cameraProviderFuture.get();
 
-                    prepareOptimalSize();
-                    preview = new Preview.Builder()
-                            .setTargetResolution(new Size(optimalPreviewSize.getWidth(), optimalPreviewSize.getHeight()))
+                prepareOptimalSize();
+                preview = new Preview.Builder()
+                        .setTargetResolution(new Size(optimalPreviewSize.getWidth(), optimalPreviewSize.getHeight()))
+                        .build();
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+
+                imageCapture = new ImageCapture.Builder()
+                        .setFlashMode(getFlashMode())
+                        .setTargetResolution(new Size(optimalPreviewSize.getWidth(), optimalPreviewSize.getHeight()))
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build();
+
+                if (hasBarcodeReader) {
+                    imageAnalyzer = new ImageAnalysis.Builder()
                             .build();
-                    preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-
-                    imageCapture = new ImageCapture.Builder()
-                            .setFlashMode(getFlashMode())
-                            .setTargetResolution(new Size(optimalPreviewSize.getWidth(), optimalPreviewSize.getHeight()))
-                            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                            .build();
-
-                    if (hasBarcodeReader) {
-                        imageAnalyzer = new ImageAnalysis.Builder()
-                                .build();
-                        imageAnalyzer.setAnalyzer(new Executor() {
-                            @Override
-                            public void execute(Runnable command) {
-                                command.run();
-                            }
-                        }, new BarcodeAnalyzer());
-                    }
-
-
-                    if (userCameraSelector == 0)
-                        cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-                    else cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
-
-                    bindCamera();
-
-
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    imageAnalyzer.setAnalyzer(Runnable::run, new BarcodeAnalyzer());
                 }
+
+
+                if (userCameraSelector == 0)
+                    cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+                else cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+
+                bindCamera();
+
+
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(activity));
     }
@@ -372,6 +360,16 @@ public class CameraViewX implements CameraViewInterface {
 
     }
 
+    static class CompareSizesByArea implements Comparator<Size> {
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            // We cast here to ensure the multiplications won't overflow
+            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
+                    (long) rhs.getWidth() * rhs.getHeight());
+        }
+    }
+
 
     public void pauseCamera2() {
         cameraProvider.unbindAll();
@@ -406,30 +404,17 @@ public class CameraViewX implements CameraViewInterface {
                         InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
 
                 scanner.process(image)
-                        .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                            @Override
-                            public void onSuccess(List<Barcode> barcodes) {
-                                if (barcodes.size() > 0) {
-                                    List<String> barcodesList = new ArrayList<>();
-                                    for (Barcode barcode : barcodes) {
-                                        barcodesList.add(barcode.getRawValue());
-                                    }
-                                    flutterMethodListener.onBarcodesRead(barcodesList);
+                        .addOnSuccessListener(barcodes -> {
+                            if (barcodes.size() > 0) {
+                                List<String> barcodesList = new ArrayList<>();
+                                for (Barcode barcode : barcodes) {
+                                    barcodesList.add(barcode.getRawValue());
                                 }
+                                flutterMethodListener.onBarcodesRead(barcodesList);
                             }
                         })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                System.out.println("Error in reading barcode: " + e.getMessage());
-                            }
-                        })
-                        .addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
-                            @Override
-                            public void onComplete(@NonNull Task<List<Barcode>> task) {
-                                imageProxy.close();
-                            }
-                        });
+                        .addOnFailureListener(e -> System.out.println("Error in reading barcode: " + e.getMessage()))
+                        .addOnCompleteListener(task -> imageProxy.close());
             }
         }
     }

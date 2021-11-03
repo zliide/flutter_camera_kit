@@ -12,7 +12,6 @@ typedef BarcodesReadCallback = void Function(List<String> barcodes);
 
 enum CameraFlashMode { on, off, auto }
 enum ScaleTypeMode { fit, fill }
-enum AndroidCameraMode { API_2, API_X }
 enum CameraSelector { front, back }
 enum BarcodeFormat {
   aztec,
@@ -57,14 +56,6 @@ class CameraKitView extends StatefulWidget {
   ///Controller for this widget
   final CameraKitController? cameraKitController;
 
-  ///This parameter has been replaced with `useCamera2API`.
-  ///This parameter accepts 3 values, `API_X`, `API_1`, `API_2`. Default value is `API_X`.
-  ///Some feature is available in each value.
-  ///`API_1` features: Just taking picture
-  ///`API_2` features: Taking picture, Scan barcode (Taking picture with flash has some issues, Auto flash in barcode scanning mode works in some phones.)
-  ///`API_X` features: Taking picture, Scan barcode (Auto flash in barcode scanning mode doesn't work.)
-  final AndroidCameraMode androidCameraMode;
-
   ///Set front and back camera
   final CameraSelector cameraSelector;
 
@@ -79,7 +70,6 @@ class CameraKitView extends StatefulWidget {
       this.previewFlashMode = CameraFlashMode.auto,
       this.cameraKitController,
       this.onPermissionDenied,
-      this.androidCameraMode = AndroidCameraMode.API_X,
       this.cameraSelector = CameraSelector.back})
       : super(key: key);
 
@@ -202,15 +192,6 @@ class NativeCameraKitController {
     }
   }
 
-  int _getAndroidCameraMode(AndroidCameraMode androidCameraMode) {
-    switch (androidCameraMode) {
-      case AndroidCameraMode.API_2:
-        return 2;
-      case AndroidCameraMode.API_X:
-        return 3;
-    }
-  }
-
   int _getCameraSelector(CameraSelector cameraSelector) {
     switch (cameraSelector) {
       case CameraSelector.back:
@@ -233,8 +214,6 @@ class NativeCameraKitController {
             'flashMode': _getCharFlashMode(widget.previewFlashMode),
             'isFillScale': _getScaleTypeMode(widget.scaleType),
             'restrictFormat': formats,
-            'androidCameraMode':
-                _getAndroidCameraMode(widget.androidCameraMode),
             'cameraSelector': _getCameraSelector(widget.cameraSelector)
           });
         } else {

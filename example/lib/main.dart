@@ -37,7 +37,6 @@ class _MyAppState extends State<MyApp> {
                 },
                 previewFlashMode: CameraFlashMode.auto,
                 cameraKitController: cameraKitController,
-                androidCameraMode: AndroidCameraMode.API_X,
                 cameraSelector: CameraSelector.back,
               )),
               Row(
