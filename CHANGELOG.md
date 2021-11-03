@@ -1,3 +1,8 @@
+## 0.0.85
+* SDK update
+* Convert to Kotlin
+* Code clean-up
+
 ## 0.0.84
 * Use the best depth capture device available
 
