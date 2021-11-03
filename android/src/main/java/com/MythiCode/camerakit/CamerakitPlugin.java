@@ -29,9 +29,8 @@ public class CamerakitPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-        if (binding.getActivity() != null) {
-            registry.registerViewFactory("plugins/camera_kit", new CameraKitFactory(messenger, binding));
-        }
+        binding.getActivity();
+        registry.registerViewFactory("plugins/camera_kit", new CameraKitFactory(messenger, binding));
     }
 
     @Override

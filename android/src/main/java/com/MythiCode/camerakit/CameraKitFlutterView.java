@@ -14,7 +14,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformView;
 
 public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodCallHandler, FlutterMethodListener {
@@ -30,27 +29,24 @@ public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodC
             case "requestPermission":
                 if (ActivityCompat.checkSelfPermission(activityPluginBinding.getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activityPluginBinding.getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-                    activityPluginBinding.addRequestPermissionsResultListener(new PluginRegistry.RequestPermissionsResultListener() {
-                        @Override
-                        public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-                            for (int i :
-                                    grantResults) {
-                                if (i == PackageManager.PERMISSION_DENIED) {
-                                    try {
-                                        result.success(false);
-                                    } catch (Exception ignored) {
+                    activityPluginBinding.addRequestPermissionsResultListener((requestCode, permissions, grantResults) -> {
+                        for (int i :
+                                grantResults) {
+                            if (i == PackageManager.PERMISSION_DENIED) {
+                                try {
+                                    result.success(false);
+                                } catch (Exception ignored) {
 
-                                    }
-                                    return false;
                                 }
+                                return false;
                             }
-                            try {
-                                result.success(true);
-                            } catch (Exception ignored) {
-
-                            }
-                            return false;
                         }
+                        try {
+                            result.success(true);
+                        } catch (Exception ignored) {
+
+                        }
+                        return false;
                     });
                     return;
                 } else {
@@ -129,21 +125,11 @@ public class CameraKitFlutterView implements PlatformView, MethodChannel.MethodC
 
     @Override
     public void onTakePicture(final MethodChannel.Result result, final String filePath) {
-        activityPluginBinding.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                result.success(filePath);
-            }
-        });
+        activityPluginBinding.getActivity().runOnUiThread(() -> result.success(filePath));
     }
 
     @Override
     public void onTakePictureFailed(final MethodChannel.Result result, final String errorCode, final String errorMessage) {
-        activityPluginBinding.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                result.error(errorCode, errorMessage, null);
-            }
-        });
+        activityPluginBinding.getActivity().runOnUiThread(() -> result.error(errorCode, errorMessage, null));
     }
 }
