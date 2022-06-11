@@ -21,7 +21,6 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -266,10 +265,10 @@ class CameraViewX(
                 val image =
                     InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                 scanner!!.process(image)
-                    .addOnSuccessListener { barcodes: List<Barcode> ->
-                        if (barcodes.isNotEmpty()) {
+                    .addOnSuccessListener {
+                        if (it.isNotEmpty()) {
                             val barcodesList: MutableList<String?> = ArrayList()
-                            for (barcode in barcodes) {
+                            for (barcode in it) {
                                 barcodesList.add(barcode.rawValue)
                             }
                             flutterMethodListener.onBarcodesRead(barcodesList)

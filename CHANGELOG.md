@@ -1,3 +1,6 @@
+## 0.0.87
+* Upgrade to Flutter 3
+
 ## 0.0.86
 * Remove picture capture functionality
 

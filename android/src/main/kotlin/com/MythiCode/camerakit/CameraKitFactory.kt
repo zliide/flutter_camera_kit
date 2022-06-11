@@ -11,7 +11,7 @@ class CameraKitFactory(
     private val messenger: BinaryMessenger,
     private val pluginBinding: ActivityPluginBinding
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-    override fun create(context: Context, id: Int, args: Any?): PlatformView {
-        return CameraKitFlutterView(pluginBinding, messenger, id)
+    override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
+        return CameraKitFlutterView(pluginBinding, messenger, viewId)
     }
 }

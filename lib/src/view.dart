@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print
+
 import 'dart:async';
 import 'dart:io';
 
@@ -11,8 +13,11 @@ import 'controller.dart';
 typedef BarcodesReadCallback = void Function(List<String> barcodes);
 
 enum CameraFlashMode { on, off, auto }
+
 enum ScaleTypeMode { fit, fill }
+
 enum CameraSelector { front, back }
+
 enum BarcodeFormat {
   aztec,
   codaBar,
@@ -78,6 +83,7 @@ class CameraKitView extends StatefulWidget {
   }
 
   @override
+  // ignore: no_logic_in_create_state
   State<StatefulWidget> createState() {
     if (cameraKitController != null) cameraKitController!.setView(this);
     viewState = _BarcodeScannerViewState();
@@ -93,7 +99,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     visibilityDetector = VisibilityDetector(
       key: const Key('visible-camerakit-key-1'),
       onVisibilityChanged: (visibilityInfo) {
@@ -140,7 +146,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -161,25 +167,22 @@ class NativeCameraKitController {
   CameraKitView widget;
 
   NativeCameraKitController._(int id, this.context, this.widget)
-      : _channel = MethodChannel('plugins/camera_kit_' + id.toString());
+      : _channel = MethodChannel('plugins/camera_kit_$id');
 
   final MethodChannel _channel;
 
   Future<dynamic> nativeMethodCallHandler(MethodCall methodCall) async {
     if (methodCall.method == 'onBarcodesRead') {
-      if (widget.onBarcodesRead != null)
+      if (widget.onBarcodesRead != null) {
         widget.onBarcodesRead!(List.from(methodCall.arguments));
+      }
     }
 
     return null;
   }
 
-  bool _getScaleTypeMode(ScaleTypeMode scaleType) {
-    if (scaleType == ScaleTypeMode.fill)
-      return true;
-    else
-      return false;
-  }
+  bool _getScaleTypeMode(ScaleTypeMode scaleType) =>
+      scaleType == ScaleTypeMode.fill;
 
   String _getCharFlashMode(CameraFlashMode cameraFlashMode) {
     switch (cameraFlashMode) {
