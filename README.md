@@ -1,8 +1,6 @@
 # Flutter Camera Kit
 
-
-
-Flutter camera kit uses native android and ios APIs for taking picture and scanning barcode with controlable flash.This plugin uses Camera2 API in android and AVFoundation in iOS for taking picture and  MLFirebase library for scanning barcode.
+Flutter camera kit uses native android and ios APIs for taking picture and scanning barcode with controllable flash.This plugin uses Camera2 API in android and AVFoundation in iOS for taking picture and  MLFirebase library for scanning barcode.
 
 Main features:
   - Easy implementation with controller
@@ -15,14 +13,13 @@ Main features:
 
 # Installation
 
-
 ## iOS
 Add `io.flutter.embedded_views_preview` in info.plist with value `YES`.
 Add `Privacy - Camera Usage Description` in info.plist.
 
 # Usage
 
-For use plugin, You shoude an instance of `CameraKitController` then initial `CameraKitView` passing `CameraKitController` instance to it.
+For use plugin, You should an instance of `CameraKitController` then initial `CameraKitView` passing `CameraKitController` instance to it.
 ```
    cameraKitController = CameraKitController();
     cameraKitView = CameraKitView(
@@ -43,7 +40,7 @@ For use plugin, You shoude an instance of `CameraKitController` then initial `Ca
       },
     );
 ```
-## Cunstructor parameters
+## Constructor parameters
 `hasBarcodeReader`:
 True means scan barcode mode and false means take picture mode
 
@@ -63,8 +60,8 @@ This parameter accepts 3 values, `CameraFlashMode.auto`, `CameraFlashMode.on` an
 This parameter accepts 3 values, `API_X`, `API_1`, `API_2`. Default value is `API_X`.
 Some feature is available in each value.
 `API_1` features: Taking picture
-`API_2` features: Taking picture, Scaning barcode (Taking picture with flash has some issues, Auto flash in barcode scanning mode works in some phones.)
-`API_X` features: Taking picture, Scaning barcode (Auto flash in barcode scanning mode doesn't work.)
+`API_2` features: Taking picture, Scanning barcode (Taking picture with flash has some issues, Auto flash in barcode scanning mode works in some phones.)
+`API_X` features: Taking picture, Scanning barcode (Auto flash in barcode scanning mode doesn't work.)
 
 `cameraSelector`:
 Set front and back camera with this parameter.
@@ -78,14 +75,14 @@ In barcodeReader mode, while camera preview detect barcodes, This method is call
 
 ## Controller methods
 **Take Picture**
-You can take picture with this method. Unlike `API_2`, in `API_X`, you can take picture in scaning barcode mode.
+You can take picture with this method. Unlike `API_2`, in `API_X`, you can take picture in scanning barcode mode.
 You can pass your custom path for save image. You can pass nothing and the image will be saved in default path.
 
 ```
   String path = await cameraKitController.takePicture({Your custom path});
 ```
 **Change Flash Mode**
-For changing flash mode, don't change cunstructor parameter. Use `changeFlashMode` method in controller. Pass `CameraFlashMode` enum to this method.
+For changing flash mode, don't change constructor parameter. Use `changeFlashMode` method in controller. Pass `CameraFlashMode` enum to this method.
 ```
     cameraKitController.changeFlashMode(CameraFlashMode.on);
 ```

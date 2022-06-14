@@ -14,6 +14,7 @@ class CameraBaseView(
 ) : PlatformView {
     private val linearLayout: FrameLayout = FrameLayout(activity)
     private var cameraViewInterface: CameraViewInterface? = null
+
     fun initCamera(
         hasBarcodeReader: Boolean,
         flashMode: Char,
@@ -21,15 +22,16 @@ class CameraBaseView(
         restrictFormat: ArrayList<Int?>?,
         cameraSelector: Int
     ) {
-        cameraViewInterface = CameraViewX(activity, flutterMethodListener)
-        (cameraViewInterface as CameraViewX).initCamera(
-            linearLayout,
-            hasBarcodeReader,
-            flashMode,
-            isFillScale,
-            restrictFormat,
-            cameraSelector
-        )
+        cameraViewInterface = CameraViewX(activity, flutterMethodListener).apply {
+            initCamera(
+                linearLayout,
+                hasBarcodeReader,
+                flashMode,
+                isFillScale,
+                restrictFormat,
+                cameraSelector
+            )
+        }
     }
 
     fun setCameraVisible(isCameraVisible: Boolean) {
@@ -61,6 +63,6 @@ class CameraBaseView(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT
         )
-        linearLayout.setBackgroundColor(Color.parseColor("#000000"))
+        linearLayout.setBackgroundColor(Color.argb(0,0,0,0))
     }
 }

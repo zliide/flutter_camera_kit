@@ -34,7 +34,6 @@ enum BarcodeFormat {
   upcE,
 }
 
-// ignore: must_be_immutable
 class CameraKitView extends StatefulWidget {
   /// In barcodeReader mode, while camera preview detect barcodes, This method is called.
   final BarcodesReadCallback? onBarcodesRead;
@@ -43,7 +42,7 @@ class CameraKitView extends StatefulWidget {
   final VoidCallback? onPermissionDenied;
 
   ///There are 2 modes `ScaleTypeMode.fill` and `ScaleTypeMode.fit` for this parameter.
-  ///If you want camera preview fill your widget area, use `fill` mode. In this mode, camera preview may be croped for filling widget area.
+  ///If you want camera preview fill your widget area, use `fill` mode. In this mode, camera preview may be cropped for filling widget area.
   ///If you want camera preview to show entire lens preview, use `fit` mode. In this mode, camera preview may be shows blank areas.
   final ScaleTypeMode scaleType;
 
@@ -51,112 +50,154 @@ class CameraKitView extends StatefulWidget {
   ///Because of performance reasons, you can't use barcode reader mode and take picture mode simultaneously.
   final bool hasBarcodeReader;
 
+  ///True means that the view is initially obscured.
+  final bool initiallyVisible;
+
   ///This parameter accepts 3 values. `CameraFlashMode.auto`, `CameraFlashMode.on` and `CameraFlashMode.off`.
   /// For changing value after initial use `changeFlashMode` method in controller.
-  final CameraFlashMode previewFlashMode;
+  final CameraFlashMode initialFlashMode;
 
   ///Set barcode format from available values, default value is FORMAT_ALL_FORMATS
   final List<BarcodeFormat> restrictFormat;
 
   ///Controller for this widget
-  final CameraKitController? cameraKitController;
+  final CameraKitController? controller;
 
   ///Set front and back camera
   final CameraSelector cameraSelector;
 
-  late _BarcodeScannerViewState viewState;
-
-  CameraKitView(
-      {Key? key,
-      this.hasBarcodeReader = false,
-      this.scaleType = ScaleTypeMode.fill,
-      this.onBarcodesRead,
-      this.restrictFormat = const [],
-      this.previewFlashMode = CameraFlashMode.auto,
-      this.cameraKitController,
-      this.onPermissionDenied,
-      this.cameraSelector = CameraSelector.back})
-      : super(key: key);
-
-  void dispose() {
-    viewState.disposeView();
-  }
+  CameraKitView({
+    Key? key,
+    this.initiallyVisible = true,
+    this.hasBarcodeReader = false,
+    this.scaleType = ScaleTypeMode.fill,
+    this.onBarcodesRead,
+    this.restrictFormat = const [],
+    this.initialFlashMode = CameraFlashMode.auto,
+    this.controller,
+    this.onPermissionDenied,
+    this.cameraSelector = CameraSelector.back,
+  }) : super(key: key);
 
   @override
-  // ignore: no_logic_in_create_state
-  State<StatefulWidget> createState() {
-    if (cameraKitController != null) cameraKitController!.setView(this);
-    viewState = _BarcodeScannerViewState();
-    return viewState;
-  }
+  State<StatefulWidget> createState() => _BarcodeScannerViewState();
 }
 
 class _BarcodeScannerViewState extends State<CameraKitView>
     with WidgetsBindingObserver {
-  NativeCameraKitController? controller;
-  late VisibilityDetector visibilityDetector;
+  _NativeCameraKitController? _nativeController;
+  CameraKitController? _localController;
+  CameraKitController? get _effectiveController =>
+      widget.controller ?? _localController;
+
+  bool _lifeCyclePaused = false;
+  bool _visible = true;
+  CameraFlashMode _flashMode = CameraFlashMode.auto;
 
   @override
   void initState() {
     super.initState();
+    if (widget.controller == null) {
+      _localController = CameraKitController(
+          active: widget.initiallyVisible, flashMode: widget.initialFlashMode);
+    }
+    _visible = !_effectiveController!.value.active;
+    _flashMode = _effectiveController!.value.flashMode;
+    _effectiveController!.addListener(_onControllerValueChanged);
     _binding().addObserver(this);
-    visibilityDetector = VisibilityDetector(
-      key: const Key('visible-camerakit-key-1'),
-      onVisibilityChanged: (visibilityInfo) {
-        controller?.setCameraVisible(visibilityInfo.visibleFraction != 0);
-      },
-      child: defaultTargetPlatform == TargetPlatform.android
-          ? AndroidView(
-              viewType: 'plugins/camera_kit',
-              onPlatformViewCreated: _onPlatformViewCreated,
-            )
-          : UiKitView(
-              viewType: 'plugins/camera_kit',
-              onPlatformViewCreated: _onPlatformViewCreated,
-            ),
-    );
   }
 
   @override
-  Widget build(BuildContext context) => visibilityDetector;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        print('Flutter Life Cycle: resumed');
-        if (controller != null) {
-          controller!.resumeCamera();
-        }
-        break;
-      case AppLifecycleState.inactive:
-        print('Flutter Life Cycle: inactive');
-        if (Platform.isIOS) {
-          controller!.pauseCamera();
-        }
-        break;
-      case AppLifecycleState.paused:
-        print('Flutter Life Cycle: paused');
-        controller!.pauseCamera();
-        break;
-      default:
-        break;
+  void didUpdateWidget(covariant CameraKitView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_onControllerValueChanged);
+      if (widget.controller == null) {
+        _localController = CameraKitController(
+          active: oldWidget.controller!.value.active,
+          flashMode: oldWidget.controller!.value.flashMode,
+        );
+      }
+      _effectiveController!.addListener(_onControllerValueChanged);
     }
   }
 
   @override
   void dispose() {
     _binding().removeObserver(this);
+    _nativeController
+        ?.setCameraVisible(false)
+        .then((_) => _nativeController?.dispose());
+    _nativeController = null;
+    _effectiveController?.removeListener(_onControllerValueChanged);
+    _localController?.dispose();
     super.dispose();
   }
 
-  void _onPlatformViewCreated(int id) {
-    controller = NativeCameraKitController._(id, context, widget);
-    controller!.initCamera();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _lifeCyclePaused = false;
+        _nativeController?.resumeCamera();
+        break;
+      case AppLifecycleState.inactive:
+        if (Platform.isIOS) {
+          _lifeCyclePaused = true;
+          _nativeController?.pauseCamera();
+        }
+        break;
+      case AppLifecycleState.paused:
+        _lifeCyclePaused = true;
+        _nativeController?.pauseCamera();
+        break;
+      default:
+        break;
+    }
   }
 
-  void disposeView() {
-    controller!.dispose();
+  void _onControllerValueChanged() {
+    final controller = _nativeController;
+    if (controller == null) {
+      return;
+    }
+    final value = _effectiveController!.value;
+    if (value.active != _visible) {
+      controller.setCameraVisible(value.active);
+      _visible = value.active;
+    }
+    if (value.flashMode != _flashMode) {
+      controller.changeFlashMode(value.flashMode);
+      _flashMode = value.flashMode;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => VisibilityDetector(
+        key: const Key('visible-camera-kit-key-1'),
+        onVisibilityChanged: (visibilityInfo) {
+          _visible = visibilityInfo.visibleFraction != 0;
+          _nativeController?.setCameraVisible(_visible);
+        },
+        child: defaultTargetPlatform == TargetPlatform.android
+            ? AndroidView(
+                viewType: 'plugins/camera_kit',
+                onPlatformViewCreated: _onPlatformViewCreated,
+              )
+            : UiKitView(
+                viewType: 'plugins/camera_kit',
+                onPlatformViewCreated: _onPlatformViewCreated,
+              ),
+      );
+
+  void _onPlatformViewCreated(int id) {
+    final controller =
+        _nativeController = _NativeCameraKitController._(id, context, widget);
+    if (_lifeCyclePaused) {
+      controller.pauseCamera();
+    }
+    controller.setCameraVisible(_visible);
+    controller.initCamera(_flashMode);
   }
 }
 
@@ -166,14 +207,13 @@ T? _ambiguate<T>(T? value) => value;
 
 ///View State controller. User works with CameraKitController
 ///and CameraKitController Works with this controller.
-class NativeCameraKitController {
+class _NativeCameraKitController {
   BuildContext context;
   CameraKitView widget;
+  MethodChannel? _channel;
 
-  NativeCameraKitController._(int id, this.context, this.widget)
+  _NativeCameraKitController._(int id, this.context, this.widget)
       : _channel = MethodChannel('plugins/camera_kit_$id');
-
-  final MethodChannel _channel;
 
   Future<dynamic> nativeMethodCallHandler(MethodCall methodCall) async {
     if (methodCall.method == 'onBarcodesRead') {
@@ -181,7 +221,6 @@ class NativeCameraKitController {
         widget.onBarcodesRead!(List.from(methodCall.arguments));
       }
     }
-
     return null;
   }
 
@@ -208,54 +247,56 @@ class NativeCameraKitController {
     }
   }
 
-  Future<void> initCamera() async {
-    _channel.setMethodCallHandler(nativeMethodCallHandler);
-    _channel.invokeMethod<bool>('requestPermission').then((value) {
-      if (value ?? false) {
-        final formats = widget.restrictFormat
-            .map((f) => _getBarcodeFormatValue(f))
-            .toList();
-        if (Platform.isAndroid) {
-          _channel.invokeMethod<void>('initCamera', {
-            'hasBarcodeReader': widget.hasBarcodeReader,
-            'flashMode': _getCharFlashMode(widget.previewFlashMode),
-            'isFillScale': _getScaleTypeMode(widget.scaleType),
-            'restrictFormat': formats,
-            'cameraSelector': _getCameraSelector(widget.cameraSelector)
-          });
-        } else {
-          _channel.invokeMethod<void>('initCamera', {
-            'hasBarcodeReader': widget.hasBarcodeReader,
-            'flashMode': _getCharFlashMode(widget.previewFlashMode),
-            'isFillScale': _getScaleTypeMode(widget.scaleType),
-            'restrictFormat': formats,
-            'cameraSelector': _getCameraSelector(widget.cameraSelector)
-          });
-        }
-      } else {
-        widget.onPermissionDenied!();
-      }
+  Future<void> initCamera(CameraFlashMode flashMode) async {
+    final channel = _channel;
+    if (channel == null) {
+      return;
+    }
+    channel.setMethodCallHandler(nativeMethodCallHandler);
+    final permissionGranted =
+        await channel.invokeMethod<bool>('requestPermission');
+    if (permissionGranted != true) {
+      widget.onPermissionDenied!();
+      return;
+    }
+    final formats =
+        widget.restrictFormat.map((f) => _getBarcodeFormatValue(f)).toList();
+    await channel.invokeMethod<void>('initCamera', {
+      'hasBarcodeReader': widget.hasBarcodeReader,
+      'flashMode': _getCharFlashMode(flashMode),
+      'isFillScale': _getScaleTypeMode(widget.scaleType),
+      'restrictFormat': formats,
+      'cameraSelector': _getCameraSelector(widget.cameraSelector)
     });
   }
 
   ///Call resume camera in Native API
-  Future<void> resumeCamera() => _channel.invokeMethod('resumeCamera');
+  Future<void> resumeCamera() async =>
+      await _channel?.invokeMethod('resumeCamera');
 
   ///Call pause camera in Native API
-  Future<void> pauseCamera() => _channel.invokeMethod('pauseCamera');
+  Future<void> pauseCamera() async =>
+      await _channel?.invokeMethod('pauseCamera');
 
   ///Call change flash mode in Native API
-  Future<void> changeFlashMode(CameraFlashMode captureFlashMode) =>
-      _channel.invokeMethod('changeFlashMode',
+  Future<void> changeFlashMode(CameraFlashMode captureFlashMode) async =>
+      await _channel?.invokeMethod('changeFlashMode',
           {'flashMode': _getCharFlashMode(captureFlashMode)});
 
   ///Call dispose in Native API
-  Future<void> dispose() => _channel.invokeMethod('dispose');
+  Future<void> dispose() {
+    final channel = _channel;
+    _channel = null;
+    if (channel == null) {
+      return Future<void>.value();
+    }
+    return channel.invokeMethod('dispose');
+  }
 
   ///Call set camera visible in Native API.
   ///This API is used to automatically manage pause and resume camera
-  Future<void> setCameraVisible(bool isCameraVisible) => _channel
-      .invokeMethod('setCameraVisible', {'isCameraVisible': isCameraVisible});
+  Future<void> setCameraVisible(bool isCameraVisible) async => await _channel
+      ?.invokeMethod('setCameraVisible', {'isCameraVisible': isCameraVisible});
 
   int _getBarcodeFormatValue(BarcodeFormat format) {
     switch (format) {
