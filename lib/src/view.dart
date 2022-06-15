@@ -99,7 +99,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _binding().addObserver(this);
     visibilityDetector = VisibilityDetector(
       key: const Key('visible-camerakit-key-1'),
       onVisibilityChanged: (visibilityInfo) {
@@ -146,7 +146,7 @@ class _BarcodeScannerViewState extends State<CameraKitView>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _binding().removeObserver(this);
     super.dispose();
   }
 
@@ -159,6 +159,10 @@ class _BarcodeScannerViewState extends State<CameraKitView>
     controller!.dispose();
   }
 }
+
+WidgetsBinding _binding() => _ambiguate(WidgetsBinding.instance)!;
+
+T? _ambiguate<T>(T? value) => value;
 
 ///View State controller. User works with CameraKitController
 ///and CameraKitController Works with this controller.
